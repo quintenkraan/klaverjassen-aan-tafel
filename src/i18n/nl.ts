@@ -1,4 +1,15 @@
-import type { Gesture, Meaning, Suit } from '../engine';
+import type { Card, Gesture, Meaning, Rank, Suit } from '../engine';
+
+const RANK_NAMES: Record<Rank, string> = {
+  '7': 'zeven',
+  '8': 'acht',
+  '9': 'negen',
+  '10': 'tien',
+  B: 'boer',
+  V: 'vrouw',
+  H: 'heer',
+  A: 'aas',
+};
 
 export const nl = {
   title: 'Klaverjassen aan tafel',
@@ -12,6 +23,12 @@ export const nl = {
     harten: 'Harten',
     schoppen: 'Schoppen',
   } as Record<Suit, string>,
+  cardName: (card: Card) => `${card.suit} ${RANK_NAMES[card.rank]}`,
+  onTable: 'Op tafel',
+  emptyTable: 'Nog niets op tafel',
+  rotateHint: 'Draai je telefoon een kwartslag voor de tafel.',
+  keysHint:
+    'Toetsen: 1-8 speelt een kaart, S seinen, Z "Ik zag dat!", L laatste slag, M geluid, Esc sluiten.',
   trump: 'Troef',
   plays: 'speelt',
   dealer: 'deler',
@@ -126,6 +143,8 @@ export const nl = {
       title: 'Bediening',
       lines: [
         'Klik op een kaart of sleep hem omhoog naar het midden.',
+        'Met het toetsenbord: 1-8 speelt de kaart met dat nummer, pijltjes en Enter werken ook.',
+        'S opent het seinmenu (daarna 1-6 voor een gebaar), Z is "Ik zag dat!", L de laatste slag, M het geluid en Esc sluit.',
         'Je potje wordt automatisch bewaard. Via "Menu" ga je terug naar het startscherm.',
       ],
     },

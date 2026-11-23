@@ -1,4 +1,5 @@
 import type { Card, Suit } from '../engine';
+import { nl } from '../i18n/nl';
 
 const SYMBOL: Record<Suit, string> = { klaveren: '♣', ruiten: '♦', harten: '♥', schoppen: '♠' };
 const RED: Record<Suit, boolean> = { klaveren: false, ruiten: true, harten: true, schoppen: false };
@@ -22,7 +23,7 @@ export function CardView({ card, faceDown, playable, small, dim, onClick }: Prop
   ]
     .filter(Boolean)
     .join(' ');
-  const label = card && !faceDown ? `${card.rank} ${card.suit}` : 'dichte kaart';
+  const label = card && !faceDown ? nl.cardName(card) : 'dichte kaart';
 
   const svg = (
     <svg viewBox="0 0 70 100" aria-hidden="true">

@@ -48,6 +48,8 @@ export function Avatar({ seat, cards, thinking, dealer, speech, gesture, nod }: 
           <motion.div
             key={speech.id}
             className="bubble"
+            role="status"
+            aria-label={`${nl.players[seat]}: ${speech.text}`}
             initial={{ opacity: 0, y: 8, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0 }}

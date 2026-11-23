@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { cardId, type Card, type Seat, type Trick } from '../engine';
+import { nl } from '../i18n/nl';
 import { CardView } from './CardView';
 
 /** Waar een kaart vandaan komt (en naartoe gaat als die speler de slag pakt). */
@@ -25,7 +26,15 @@ function tilt(card: Card): number {
 
 export function TrickArea({ trick, winner }: { trick: Trick | undefined; winner: Seat | null }) {
   return (
-    <div className="tablewrap">
+    <div
+      className="tablewrap"
+      role="region"
+      aria-label={
+        trick?.cards.length
+          ? `${nl.onTable}: ${trick.cards.map((pc) => `${nl.players[pc.seat]} ${nl.cardName(pc.card)}`).join(', ')}`
+          : nl.emptyTable
+      }
+    >
       <div className="felt">
         <div className="felt__center">
           <AnimatePresence custom={winner}>

@@ -607,6 +607,62 @@ body:has(.setup) {
   text-align: left;
 }
 
+/* Toetsenbord */
+:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+.fan__card:focus-visible {
+  outline: none;
+}
+.fan__card:focus-visible .card svg {
+  filter: drop-shadow(0 0 8px var(--gold));
+}
+.fan__key {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--pencil);
+  background: var(--gold);
+  border-radius: 8px;
+  padding: 0 6px;
+  opacity: 0.85;
+}
+.fan__card {
+  position: relative;
+}
+
+/* Telefoon rechtop: vraag om te draaien */
+.rotate-hint {
+  display: none;
+}
+@media (orientation: portrait) and (max-width: 600px) {
+  .rotate-hint {
+    display: grid;
+    place-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    padding: 24px;
+    text-align: center;
+    font-size: 1.2rem;
+    background: var(--felt-dark);
+  }
+}
+
+/* Minder beweging: geen sier-animaties, gebaren blijven (die zijn spelinformatie) */
+@media (prefers-reduced-motion: reduce) {
+  .avatar__eye,
+  .avatar--thinking .avatar__head {
+    animation: none;
+  }
+  .avatar--g-knipoog .avatar__eye--r {
+    animation: wink 1.2s ease;
+  }
+}
+
 /* Tablet en mobiel (landschap) */
 @media (max-width: 900px), (max-height: 560px) {
   .layout {

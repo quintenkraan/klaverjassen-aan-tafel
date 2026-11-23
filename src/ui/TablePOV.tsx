@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { bidOptions, GESTURES, playableCards, sortHand } from '../engine';
+import { bidOptions, GESTURES, playableCards, sameCard, sortHand } from '../engine';
 import { nl } from '../i18n/nl';
 import { Avatar } from './Avatar';
 import { HandFan } from './HandFan';
@@ -50,6 +50,44 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
     sound.deal();
   }, [game.roundIndex]);
 
+  const hand = sortHand(round.hands[0]!, round.trump);
+  const signalsOn = rules.signals.enabled && round.phase === 'spelen';
+  const toggleMute = () => {
+    sound.setMuted(!muted);
+    setMuted(!muted);
+  };
+
+  // Toetsenbord: 1-8 kaart spelen (of gebaar kiezen als het seinmenu open is),
+  // S seinen, Z "Ik zag dat!", L laatste slag, M geluid, Esc sluiten.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target;
+      const typing = t instanceof Element && t.closest('input, select, textarea');
+      if (e.ctrlKey || e.metaKey || e.altKey || typing) return;
+      const k = e.key.toLowerCase();
+      if (k === 'escape') {
+        setMenu(false);
+        setShowLast(false);
+      } else if (/^[1-8]$/.test(k)) {
+        const n = Number(k) - 1;
+        if (menu && GESTURES[n]) {
+          g.signal(GESTURES[n]);
+          setMenu(false);
+        } else {
+          const card = hand[n];
+          if (card && playable.some((c) => sameCard(c, card))) play(card);
+        }
+      } else if (k === 's' && signalsOn) setMenu((m) => !m);
+      else if (k === 'z' && signalsOn) g.accuse();
+      else if (k === 'l' && lastTrick) setShowLast((v) => !v);
+      else if (k === 'm') toggleMute();
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   let status: string = nl.waitingFor(nl.players[round.turn]);
   if (myTurn) status = bid ? nl.chooseTrump : nl.dragHint;
   if (pause && lastTrick) status = nl.wonBy(nl.players[lastTrick.winner]);
@@ -57,6 +95,9 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
 
   return (
     <div className="layout">
+      <div className="rotate-hint" role="alert">
+        {nl.rotateHint}
+      </div>
       <div className="room">
         <div className="info">
           <span>
@@ -71,7 +112,9 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
               nl.chooseTrump
             )}
           </span>
-          <span className="info__status">{status}</span>
+          <span className="info__status" role="status" aria-live="polite">
+            {status}
+          </span>
           <span className="info__buttons">
             <button type="button" onClick={onExit}>
               {nl.menu}
@@ -82,10 +125,7 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
             <button
               type="button"
               aria-label={muted ? nl.soundOn : nl.soundOff}
-              onClick={() => {
-                sound.setMuted(!muted);
-                setMuted(!muted);
-              }}
+              onClick={toggleMute}
             >
               {muted ? '🔇' : '🔊'}
             </button>
@@ -109,8 +149,8 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
 
         {bid && (
           <div className="bid">
-            {bid.suits.map((s) => (
-              <button key={s} type="button" onClick={() => choose(s)}>
+            {bid.suits.map((s, i) => (
+              <button key={s} type="button" autoFocus={i === 0} onClick={() => choose(s)}>
                 {nl.suits[s]}
               </button>
             ))}
@@ -133,7 +173,7 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
           )}
         </div>
 
-        {rules.signals.enabled && round.phase === 'spelen' && (
+        {signalsOn && (
           <>
             <div className="signals">
               {menu && (
@@ -163,7 +203,7 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
           </>
         )}
         <HandFan
-          cards={sortHand(round.hands[0]!, round.trump)}
+          cards={hand}
           playable={playable}
           active={myTurn && round.phase === 'spelen'}
           onPlay={play}

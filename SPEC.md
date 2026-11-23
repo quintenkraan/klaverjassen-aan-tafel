@@ -2,7 +2,7 @@
 
 ## Status
 - [x] F1 Opzet  - [x] F2 Engine  - [x] F3 2D-tafel  - [x] F4 POV
-- [x] F5 Bot-AI  - [x] F6 Seinen  - [x] F7 Score/opslaan  - [ ] F8 Afwerking
+- [x] F5 Bot-AI  - [x] F6 Seinen  - [x] F7 Score/opslaan  - [x] F8 Afwerking (toetsenbord, schermlezer-labels, minder beweging, draai-hint, README)
 
 ## S1 Doel
 First-person klaverjasgame in de browser. POV van één speler, maat tegenover, tegenstanders
