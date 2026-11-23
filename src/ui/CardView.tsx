@@ -8,16 +8,17 @@ interface Props {
   faceDown?: boolean;
   playable?: boolean;
   small?: boolean;
+  dim?: boolean;
   onClick?: () => void;
 }
 
 /** Speelkaart als inline SVG. Geen externe afbeeldingen. */
-export function CardView({ card, faceDown, playable, small, onClick }: Props) {
+export function CardView({ card, faceDown, playable, small, dim, onClick }: Props) {
   const cls = [
     'card',
     small && 'card--small',
     playable && 'card--playable',
-    onClick && !playable && 'card--dim',
+    (dim || (onClick && !playable)) && 'card--dim',
   ]
     .filter(Boolean)
     .join(' ');

@@ -14,34 +14,40 @@ import {
   type Suit,
 } from '../engine';
 
-const BOT_DELAY = [500, 1100] as const;
-const TRICK_PAUSE = 1300;
+const TRICK_PAUSE = 1400;
+
+/** Bedenktijd: soms vlot, soms even twijfelen. */
+function thinkTime(rng: () => number, bidding: boolean): number {
+  const base = bidding ? 900 : 550;
+  return base + rng() * 700 + (rng() < 0.15 ? 900 : 0);
+}
 
 /** Spelstatus + bots. De UI roept alleen deze acties aan; regels zitten in de engine. */
 export function useGame(seed: number) {
   const [game, setGame] = useState<GameState>(() => createGame(DEFAULT_RULES, seed));
-  const [pause, setPause] = useState(false);
+  const [ackedKey, setAckedKey] = useState('');
   const botRng = useRef(createRng(seed ^ 0x5eed));
   const round = game.round;
 
-  // Na een volle slag even laten liggen zodat je ziet wie hem pakt.
-  useEffect(() => {
-    if (round.tricks.length === 0) return;
-    setPause(true);
-    const t = setTimeout(() => setPause(false), TRICK_PAUSE);
-    return () => clearTimeout(t);
-  }, [round.tricks.length]);
+  // Na een volle slag blijft hij even liggen. Afgeleid i.p.v. apart gezet: geen flikkering.
+  const trickKey = `${game.roundIndex}:${round.tricks.length}`;
+  const pause = round.tricks.length > 0 && ackedKey !== trickKey;
 
-  // Bots aan de beurt: na een wisselende bedenktijd één stap zetten.
+  useEffect(() => {
+    if (!pause) return;
+    const t = setTimeout(() => setAckedKey(trickKey), TRICK_PAUSE);
+    return () => clearTimeout(t);
+  }, [pause, trickKey]);
+
   useEffect(() => {
     if (pause || round.turn === 0 || round.phase === 'klaar') return;
-    const [min, max] = BOT_DELAY;
-    const delay = min + botRng.current() * (max - min);
-    const t = setTimeout(() => {
-      setGame((g) =>
-        g.round.turn === 0 ? g : { ...g, round: simpleBotStep(g.round, g.rules, botRng.current) },
-      );
-    }, delay);
+    const t = setTimeout(
+      () =>
+        setGame((g) =>
+          g.round.turn === 0 ? g : { ...g, round: simpleBotStep(g.round, g.rules, botRng.current) },
+        ),
+      thinkTime(botRng.current, round.phase === 'bieden'),
+    );
     return () => clearTimeout(t);
   }, [round, pause]);
 

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { nl } from './i18n/nl';
-import { Table2D } from './ui/Table2D';
+import { TablePOV } from './ui/TablePOV';
 
 export function App() {
   const [seed, setSeed] = useState<number | null>(null);
 
-  if (seed !== null) return <Table2D seed={seed} />;
+  if (seed !== null) return <TablePOV seed={seed} />;
 
   return (
     <main className="start">
