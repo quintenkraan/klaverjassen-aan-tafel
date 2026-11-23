@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Difficulty, GameLength, SignalPenalty, TrumpMode, Variant } from '../engine';
 import { nl } from '../i18n/nl';
-import type { Settings } from './storage';
+import type { Settings, View } from './storage';
 
 const LENGTHS: Record<string, GameLength> = {
   s16: { kind: 'spellen', count: 16 },
@@ -59,6 +59,15 @@ export function SettingsScreen({
     <main className="setup">
       <h1>{nl.settings}</h1>
 
+      <Choice<View>
+        label={set.view}
+        value={s.view}
+        options={[
+          { value: '3d', label: set.view3d },
+          { value: '2d', label: set.view2d },
+        ]}
+        onChange={(view) => setS({ ...s, view })}
+      />
       <Choice<Variant>
         label={set.variant}
         value={s.variant}

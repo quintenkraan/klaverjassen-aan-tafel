@@ -87,7 +87,11 @@ export const nl = {
     gemiddeld: 'Gemiddeld',
     sterk: 'Sterk',
     signals: 'Seinen',
+    view: 'Weergave',
+    view3d: 'Echte 3D-tafel',
+    view2d: 'Eenvoudige tafel (voor oudere of trage apparaten)',
   },
+  loading3d: 'Tafel wordt gedekt...',
   rules: [
     {
       title: 'Het spel',

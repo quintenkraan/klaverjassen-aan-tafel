@@ -607,6 +607,52 @@ body:has(.setup) {
   text-align: left;
 }
 
+/* 3D-tafel */
+.scene3d {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.loading3d {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  color: var(--gold);
+}
+.tag3d {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  pointer-events: none;
+  user-select: none;
+}
+.bubble--3d {
+  position: static;
+}
+.nametag {
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.45);
+  color: var(--ink);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.nametag--turn {
+  background: var(--gold);
+  color: var(--pencil);
+}
+.ahum3d {
+  color: #fff;
+  opacity: 0.7;
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+
 /* Toetsenbord */
 :focus-visible {
   outline: 3px solid var(--gold);

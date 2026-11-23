@@ -1,4 +1,8 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { webglAvailable } from './three/support';
+
+/** three.js is groot: pas laden als de 3D-tafel echt nodig is. */
+const Scene3D = lazy(() => import('./three/Scene3D'));
 import { bidOptions, GESTURES, playableCards, sameCard, sortHand } from '../engine';
 import { nl } from '../i18n/nl';
 import { Avatar } from './Avatar';
@@ -51,6 +55,10 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
   }, [game.roundIndex]);
 
   const hand = sortHand(round.hands[0]!, round.trump);
+  const use3d = (config.view ?? '3d') === '3d' && webglAvailable();
+  const tableLabel = shownTrick?.cards.length
+    ? `${nl.onTable}: ${shownTrick.cards.map((pc) => `${nl.players[pc.seat]} ${nl.cardName(pc.card)}`).join(', ')}`
+    : nl.emptyTable;
   const signalsOn = rules.signals.enabled && round.phase === 'spelen';
   const toggleMute = () => {
     sound.setMuted(!muted);
@@ -132,20 +140,37 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
           </span>
         </div>
 
-        {([1, 2, 3] as const).map((seat) => (
-          <Avatar
-            key={seat}
-            seat={seat}
-            cards={round.hands[seat]!.length}
-            thinking={round.turn === seat && !pause && round.phase !== 'klaar'}
-            dealer={round.dealer === seat}
-            speech={speech?.seat === seat ? speech : null}
-            gesture={gesture?.seat === seat ? gesture.gesture : null}
-            nod={seat === 2 && nodding}
-          />
-        ))}
+        {use3d && (
+          <Suspense fallback={<div className="loading3d">{nl.loading3d}</div>}>
+            <Scene3D
+              trick={shownTrick}
+              winner={lastTrick?.winner ?? null}
+              handCounts={[round.hands[1]!.length, round.hands[2]!.length, round.hands[3]!.length]}
+              thinking={!pause && round.phase !== 'klaar' ? round.turn : null}
+              dealer={round.dealer}
+              speech={speech}
+              gesture={gesture}
+              nodSeat={nodding ? 2 : null}
+              label={tableLabel}
+            />
+          </Suspense>
+        )}
 
-        <TrickArea trick={shownTrick} winner={lastTrick?.winner ?? null} />
+        {!use3d &&
+          ([1, 2, 3] as const).map((seat) => (
+            <Avatar
+              key={seat}
+              seat={seat}
+              cards={round.hands[seat]!.length}
+              thinking={round.turn === seat && !pause && round.phase !== 'klaar'}
+              dealer={round.dealer === seat}
+              speech={speech?.seat === seat ? speech : null}
+              gesture={gesture?.seat === seat ? gesture.gesture : null}
+              nod={seat === 2 && nodding}
+            />
+          ))}
+
+        {!use3d && <TrickArea trick={shownTrick} winner={lastTrick?.winner ?? null} />}
 
         {bid && (
           <div className="bid">

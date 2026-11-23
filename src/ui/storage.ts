@@ -19,9 +19,15 @@ export interface TableConfig {
   agreement: Agreement;
   showLog: boolean;
   difficulty: Difficulty;
+  /** Ontbreekt in oude saves: dan 3D. */
+  view?: View;
 }
 
+/** 3d = echte 3D-tafel, 2d = eenvoudige (2.5D) tafel voor trage apparaten. */
+export type View = '3d' | '2d';
+
 export interface Settings {
+  view: View;
   variant: Variant;
   trumpMode: TrumpMode;
   length: GameLength;
@@ -38,6 +44,7 @@ export interface SavedGame {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  view: '3d',
   variant: DEFAULT_RULES.variant,
   trumpMode: DEFAULT_RULES.trumpMode,
   length: DEFAULT_RULES.length,
@@ -103,6 +110,7 @@ export function loadSettings(kv: KV | null = defaultStore()): Settings {
   const v = (read(kv, SETTINGS_KEY) ?? {}) as Partial<Settings>;
   const d = DEFAULT_SETTINGS;
   return {
+    view: oneOf(v.view, ['3d', '2d'] as const, d.view),
     variant: oneOf(v.variant, ['amsterdams', 'rotterdams'] as const, d.variant),
     trumpMode: oneOf(v.trumpMode, ['verplicht', 'vrij', 'utrechts'] as const, d.trumpMode),
     length: validLength(v.length),
@@ -126,6 +134,7 @@ export function configFrom(s: Settings): TableConfig {
     agreement: s.agreement,
     showLog: s.showLog,
     difficulty: s.difficulty,
+    view: s.view,
   };
 }
 
