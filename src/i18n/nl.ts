@@ -1,4 +1,4 @@
-import type { Suit } from '../engine';
+import type { Gesture, Meaning, Suit } from '../engine';
 
 export const nl = {
   title: 'Klaverjassen aan tafel',
@@ -41,7 +41,38 @@ export const nl = {
   close: 'Sluiten',
   wonBy: (name: string) => `${name} pakte hem`,
   dragHint: 'Klik of sleep een kaart naar het midden',
+  signal: 'Seinen',
+  accuse: 'Ik zag dat!',
+  gestures: {
+    knipoog: 'Knipogen',
+    wenkbrauw: 'Wenkbrauw optrekken',
+    tikken: 'Op tafel tikken',
+    rugkaart: 'Kaart met de rug van je hand',
+    keelschrapen: 'Keel schrapen',
+    oorkrabben: 'Aan je oor krabben',
+  } as Record<Gesture, string>,
+  meaning: (m: Meaning) => (m === 'troefboer' ? 'Ik heb de troefboer' : `Speel ${m.slice(6)}`),
+  noMeaning: 'Geen betekenis',
+  youDid: (gesture: string) => `Jij: ${gesture.toLowerCase()}`,
+  setupTitle: 'Seinafspraak met Ome Henk',
+  setupIntro:
+    'Spreek af wat elk gebaar betekent. Henk let niet altijd op en snapt het niet altijd goed. Tante Ria en Sjaak kijken mee, en hoe vaker er geseind wordt, hoe achterdochtiger de tafel.',
+  setupGesture: 'Gebaar',
+  setupMeaning: 'Betekenis',
+  signalsOn: 'Seinen aan',
+  showLog: 'Seinlog tonen (hulp voor beginners)',
+  penaltyLabel: 'Straf bij betrappen (na een waarschuwing)',
+  penaltyPoints: '50 strafpunten',
+  penaltyGame: 'Spel verbeurd',
+  toTable: 'Aan tafel',
+  signalLog: 'Seinlog',
+  forfeit: (team: string) => `${team} betrapt bij het seinen: spel verbeurd`,
+  penaltyNote: (team: string, n: number) => `${n} strafpunten voor ${team.toLowerCase()}`,
   talk: {
+    caughtWarn: ['Zag ik dat nou?', 'Hé, niet seinen hè!', 'Ik hou je in de gaten.'],
+    caughtPenalty: ['Nou is het genoeg. Straf!', 'Vals spel! Dat kost jullie.'],
+    deny: ['Ik deed niks hoor!', 'Waar heb je het over?', 'Ik had gewoon jeuk.'],
+    busted: ['Eh... ik had jeuk.', 'Betrapt...', 'Oeps.'],
     trump: (suit: string) => [
       `Ik ga in ${suit.toLowerCase()}.`,
       `${suit}, dan maar.`,

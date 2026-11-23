@@ -3,7 +3,7 @@ import type { Rng } from '../rng';
 import { roemOf } from '../roem';
 import { bidOptions, chooseTrump, passBid, playableCards, playCard } from '../round';
 import { trickWinner } from '../rules';
-import type { Card, Rank, RoundState, Rules, Seat, Suit, Trick } from '../types';
+import type { Card, Meaning, Rank, RoundState, Rules, Seat, Suit, Trick } from '../types';
 import { buildKnowledge, isBoss, type Knowledge } from './knowledge';
 import {
   DIFFICULTY,
@@ -61,6 +61,8 @@ interface Ctx {
   k: Knowledge;
   p: BotProfile;
   weArePlaying: boolean;
+  /** Wat deze bot denkt dat zijn maat heeft geseind. */
+  hint: Meaning | null;
 }
 
 const pts = (c: Card, trump: Suit) => cardPoints(c, trump);
@@ -179,7 +181,28 @@ function follow(legal: Card[], ctx: Ctx): Card {
   );
 }
 
-export function chooseCard(round: RoundState, rules: Rules, rng: Rng, p: BotProfile): Card {
+/** Uitkomen op basis van een (mogelijk verkeerd begrepen) sein van de maat. */
+function leadOnHint(legal: Card[], ctx: Ctx): Card | null {
+  const { hint, trump, k } = ctx;
+  if (!hint) return null;
+  if (hint === 'troefboer') {
+    const trumps = legal.filter((c) => c.suit === trump);
+    return ctx.weArePlaying && trumps.length > 0 ? minBy(trumps, (c) => strength(c, trump)) : null;
+  }
+  const suit = hint.slice('speel-'.length) as Suit;
+  const inSuit = legal.filter((c) => c.suit === suit);
+  if (suit === trump || inSuit.length === 0) return null;
+  const top = maxBy(inSuit, (c) => strength(c, trump));
+  return isBoss(top, k, trump) ? top : minBy(inSuit, (c) => strength(c, trump));
+}
+
+export function chooseCard(
+  round: RoundState,
+  rules: Rules,
+  rng: Rng,
+  p: BotProfile,
+  hint: Meaning | null = null,
+): Card {
   const legal = playableCards(round, rules);
   if (legal.length <= 1 || rng() < DIFFICULTY[p.difficulty].mistake) {
     return legal[Math.floor(rng() * legal.length)]!;
@@ -192,14 +215,22 @@ export function chooseCard(round: RoundState, rules: Rules, rng: Rng, p: BotProf
     k: buildKnowledge(round, rules, seat, effectiveMemory(p)),
     p,
     weArePlaying: round.playingTeam === teamOf(seat),
+    hint,
   };
-  return ctx.trick.cards.length === 0 ? lead(legal, ctx) : follow(legal, ctx);
+  if (ctx.trick.cards.length > 0) return follow(legal, ctx);
+  return leadOnHint(legal, ctx) ?? lead(legal, ctx);
 }
 
 /** Eén stap van een bot met persoonlijkheid: troef bepalen of een kaart spelen. */
-export function smartBotStep(round: RoundState, rules: Rules, rng: Rng, p: BotProfile): RoundState {
+export function smartBotStep(
+  round: RoundState,
+  rules: Rules,
+  rng: Rng,
+  p: BotProfile,
+  hint: Meaning | null = null,
+): RoundState {
   if (round.phase === 'bieden') return chooseBid(round, rules, rng, p);
-  return playCard(round, rules, round.turn, chooseCard(round, rules, rng, p));
+  return playCard(round, rules, round.turn, chooseCard(round, rules, rng, p, hint));
 }
 
 /** Gemak: bot op de stoel die aan de beurt is, met de vaste persoonlijkheid van die stoel. */
@@ -208,8 +239,9 @@ export function botStep(
   rules: Rules,
   rng: Rng,
   difficulty: Difficulty,
+  hint: Meaning | null = null,
 ): RoundState {
   const seat = round.turn;
   if (seat === 0) throw new Error('Stoel 0 is de menselijke speler');
-  return smartBotStep(round, rules, rng, profileFor(seat, difficulty));
+  return smartBotStep(round, rules, rng, profileFor(seat, difficulty), hint);
 }

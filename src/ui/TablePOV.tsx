@@ -1,20 +1,30 @@
 import { useEffect, useState } from 'react';
-import { bidOptions, playableCards, sortHand } from '../engine';
+import { bidOptions, GESTURES, playableCards, sortHand } from '../engine';
 import { nl } from '../i18n/nl';
 import { Avatar } from './Avatar';
 import { HandFan } from './HandFan';
-import { GameOverOverlay, LastTrickPopup, RoundOverlay, ScoreSheet } from './Panels';
+import { GameOverOverlay, LastTrickPopup, RoundOverlay, ScoreSheet, SignalLog } from './Panels';
+import type { TableConfig } from './SignalSetup';
 import { sound } from './sound';
 import { TrickArea } from './TrickArea';
 import { useGame } from './useGame';
 import { useTalk } from './useTalk';
 
 /** First-person tafel: jij onderin, maat tegenover, tegenstanders links en rechts. */
-export function TablePOV({ seed }: { seed: number }) {
-  const { game, pause, over, play, pass, choose, nextRound, newGame } = useGame(seed);
-  const speech = useTalk(game, seed);
+export function TablePOV({
+  seed,
+  rules: startRules,
+  agreement,
+  showLog,
+}: TableConfig & { seed: number }) {
+  const g = useGame(seed, startRules, agreement);
+  const { game, pause, over, play, pass, choose, nextRound, newGame, gesture, nod, line } = g;
+  const talk = useTalk(game, seed);
+  const speech = line && (!talk || line.id > talk.id) ? line : talk;
   const [muted, setMuted] = useState(sound.isMuted());
   const [showLast, setShowLast] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const nodding = nod;
   const { round, rules } = game;
 
   const myTurn = round.turn === 0 && !pause && round.phase !== 'klaar';
@@ -82,6 +92,8 @@ export function TablePOV({ seed }: { seed: number }) {
             thinking={round.turn === seat && !pause && round.phase !== 'klaar'}
             dealer={round.dealer === seat}
             speech={speech?.seat === seat ? speech : null}
+            gesture={gesture?.seat === seat ? gesture.gesture : null}
+            nod={seat === 2 && nodding}
           />
         ))}
 
@@ -103,9 +115,45 @@ export function TablePOV({ seed }: { seed: number }) {
         )}
 
         <div className={`me ${myTurn ? 'me--turn' : ''}`}>
-          {nl.players[0]}
-          {round.dealer === 0 && ` (${nl.dealer})`}
+          {gesture?.seat === 0 ? (
+            nl.youDid(nl.gestures[gesture.gesture])
+          ) : (
+            <>
+              {nl.players[0]}
+              {round.dealer === 0 && ` (${nl.dealer})`}
+            </>
+          )}
         </div>
+
+        {rules.signals.enabled && round.phase === 'spelen' && (
+          <>
+            <div className="signals">
+              {menu && (
+                <div className="signals__menu">
+                  {GESTURES.map((gs) => (
+                    <button
+                      key={gs}
+                      type="button"
+                      onClick={() => {
+                        g.signal(gs);
+                        setMenu(false);
+                      }}
+                    >
+                      {nl.gestures[gs]}
+                      <small>{agreement[gs] ? nl.meaning(agreement[gs]) : nl.noMeaning}</small>
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button type="button" aria-expanded={menu} onClick={() => setMenu(!menu)}>
+                {nl.signal}
+              </button>
+            </div>
+            <button type="button" className="accuse" onClick={g.accuse}>
+              {nl.accuse}
+            </button>
+          </>
+        )}
         <HandFan
           cards={sortHand(round.hands[0]!, round.trump)}
           playable={playable}
@@ -122,7 +170,9 @@ export function TablePOV({ seed }: { seed: number }) {
           round.phase === 'klaar' && !pause && <RoundOverlay game={game} onNext={nextRound} />
         )}
       </div>
-      <ScoreSheet game={game} />
+      <ScoreSheet game={game}>
+        {showLog && rules.signals.enabled && <SignalLog game={game} />}
+      </ScoreSheet>
     </div>
   );
 }

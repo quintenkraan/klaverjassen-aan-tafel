@@ -1,8 +1,16 @@
-import { scoreRound, teamOf, totals, type CompletedTrick, type GameState } from '../engine';
+import type { ReactNode } from 'react';
+import {
+  applySignalPenalties,
+  scoreRound,
+  teamOf,
+  totals,
+  type CompletedTrick,
+  type GameState,
+} from '../engine';
 import { nl } from '../i18n/nl';
 import { CardView } from './CardView';
 
-export function ScoreSheet({ game }: { game: GameState }) {
+export function ScoreSheet({ game, children }: { game: GameState; children?: ReactNode }) {
   const sum = totals(game);
   return (
     <aside className="sheet">
@@ -24,6 +32,7 @@ export function ScoreSheet({ game }: { game: GameState }) {
                   {s.total[t]}
                   {s.nat && s.playingTeam === t && ` ${nl.nat}`}
                   {s.pit === t && ` ${nl.pit}`}
+                  {(s.forfeit === t || (s.penalty?.[t] ?? 0) > 0) && ' *'}
                 </td>
               ))}
             </tr>
@@ -37,13 +46,14 @@ export function ScoreSheet({ game }: { game: GameState }) {
           </tr>
         </tfoot>
       </table>
+      {children}
     </aside>
   );
 }
 
 export function RoundOverlay({ game, onNext }: { game: GameState; onNext: () => void }) {
   const r = game.round;
-  const s = scoreRound(r.tricks, r.playingTeam!);
+  const s = applySignalPenalties(scoreRound(r.tricks, r.playingTeam!), game.signals);
   return (
     <div className="overlay">
       <h2>
@@ -80,6 +90,15 @@ export function RoundOverlay({ game, onNext }: { game: GameState; onNext: () => 
           </tr>
         </tbody>
       </table>
+      {s.forfeit !== undefined && <p className="penalty">{nl.forfeit(nl.teams[s.forfeit])}</p>}
+      {s.penalty?.map(
+        (n, t) =>
+          n > 0 && (
+            <p key={t} className="penalty">
+              {nl.penaltyNote(nl.teams[t]!, n)}
+            </p>
+          ),
+      )}
       <button type="button" onClick={onNext} autoFocus>
         {nl.nextRound}
       </button>
@@ -99,6 +118,25 @@ export function GameOverOverlay({ game, onAgain }: { game: GameState; onAgain: (
       <button type="button" onClick={onAgain} autoFocus>
         {nl.playAgain}
       </button>
+    </div>
+  );
+}
+
+/** Hulp voor beginners: gebaren die de bots dit spel maakten. Henks betekenis volgt jullie afspraak. */
+export function SignalLog({ game }: { game: GameState }) {
+  const events = game.signals.log.filter((e) => e.from !== 0).slice(-6);
+  return (
+    <div className="siglog">
+      <h3>{nl.signalLog}</h3>
+      {events.length === 0 && <p>-</p>}
+      <ul>
+        {events.map((e) => (
+          <li key={e.id}>
+            {nl.players[e.from]}: {nl.gestures[e.gesture].toLowerCase()}
+            {e.from === 2 && e.intended && ` (${nl.meaning(e.intended).toLowerCase()})`}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

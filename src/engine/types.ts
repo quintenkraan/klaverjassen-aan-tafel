@@ -26,6 +26,56 @@ export interface Rules {
   variant: Variant;
   trumpMode: TrumpMode;
   length: GameLength;
+  signals: { enabled: boolean; penalty: SignalPenalty };
+}
+
+// ---------- Seinen ----------
+
+export type Gesture =
+  'knipoog' | 'wenkbrauw' | 'tikken' | 'rugkaart' | 'keelschrapen' | 'oorkrabben';
+export type Meaning = 'troefboer' | `speel-${Suit}`;
+/** Seinafspraak: welk gebaar betekent wat. */
+export type Agreement = Record<Gesture, Meaning | null>;
+/** Straf als je na een waarschuwing opnieuw betrapt wordt. */
+export type SignalPenalty = 'punten' | 'spel';
+export type Consequence = 'geen' | 'waarschuwing' | 'strafpunten' | 'spel-verbeurd';
+
+export interface SignalEvent {
+  id: number;
+  from: Seat;
+  to: Seat;
+  gesture: Gesture;
+  intended: Meaning | null;
+  /** Heeft de maat het gezien (null als de maat de mens is: die moet zelf opletten). */
+  seen: boolean | null;
+  /** Wat de maat denkt dat het betekent (kan fout zijn). */
+  understood: Meaning | null;
+  caughtBy: Seat | null;
+  consequence: Consequence;
+  /** Moment in het spel (aantal gespeelde kaarten), voor "Ik zag dat!". */
+  at: number;
+  accused: boolean;
+}
+
+export interface SignalState {
+  agreement: Agreement;
+  /** Geheime afspraak van Tante Ria en Sjaak. */
+  opponentAgreement: Agreement;
+  /** 0..1, groeit met elk sein, halveert per spel. */
+  suspicion: number;
+  warned: [boolean, boolean];
+  /** Gebaren van jullie die de tegenstanders doorhebben. */
+  known: Gesture[];
+  /** Hoe vaak jullie een gebaar gebruikten: hoe vaker, hoe beter Henk het begrijpt. */
+  usage: Partial<Record<Gesture, number>>;
+  /** Per stoel: wat die speler denkt dat zijn maat dit spel heeft geseind. */
+  beliefs: (Meaning | null)[];
+  /** Strafpunten dit spel, per team dat ze krijgt. */
+  penalties: Pair;
+  /** Team dat dit spel verbeurd heeft. */
+  forfeit: Team | null;
+  log: SignalEvent[];
+  nextId: number;
 }
 
 export interface PlayedCard {
@@ -76,6 +126,10 @@ export interface RoundScore {
   pit: Team | null;
   /** Wat er op het scoreblok komt. */
   total: Pair;
+  /** Spel verbeurd door seinen. */
+  forfeit?: Team;
+  /** Strafpunten door seinen, per team dat ze kreeg. */
+  penalty?: Pair;
 }
 
 export interface GameState {
@@ -84,4 +138,5 @@ export interface GameState {
   roundIndex: number;
   scores: RoundScore[];
   round: RoundState;
+  signals: SignalState;
 }

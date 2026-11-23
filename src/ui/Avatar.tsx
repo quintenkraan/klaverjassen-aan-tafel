@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import type { Seat } from '../engine';
+import type { Gesture, Seat } from '../engine';
 import { nl } from '../i18n/nl';
 import { CardView } from './CardView';
 
@@ -23,13 +23,26 @@ interface Props {
   thinking: boolean;
   dealer: boolean;
   speech: Speech | null;
+  /** Gebaar dat deze speler nu maakt (kort en subtiel, makkelijk te missen). */
+  gesture: Gesture | null;
+  /** Knikt (Henk, als hij jouw sein zag). */
+  nod: boolean;
 }
 
-/** Gestileerde tafelgenoot met knipperende ogen, denk-animatie en tekstballon. */
-export function Avatar({ seat, cards, thinking, dealer, speech }: Props) {
+/** Gestileerde tafelgenoot met knipperende ogen, gebaren, denk-animatie en tekstballon. */
+export function Avatar({ seat, cards, thinking, dealer, speech, gesture, nod }: Props) {
   const look = LOOKS[seat];
+  const cls = [
+    'avatar',
+    `avatar--${seat}`,
+    thinking && 'avatar--thinking',
+    gesture && `avatar--g-${gesture}`,
+    nod && 'avatar--nod',
+  ]
+    .filter(Boolean)
+    .join(' ');
   return (
-    <div className={`avatar avatar--${seat} ${thinking ? 'avatar--thinking' : ''}`}>
+    <div className={cls}>
       <AnimatePresence>
         {speech && (
           <motion.div
@@ -64,12 +77,28 @@ export function Avatar({ seat, cards, thinking, dealer, speech }: Props) {
               <rect x="60" y="32" width="34" height="5" rx="2" fill={look.hair} />
             </>
           )}
-          <g className="avatar__eyes">
-            <circle cx="51" cy="43" r="2.6" fill="#222" />
-            <circle cx="69" cy="43" r="2.6" fill="#222" />
+          <g className="avatar__brows" stroke="#4a3020" strokeWidth="2" fill="none">
+            <path d="M46 37 Q51 34 56 37" />
+            <path d="M64 37 Q69 34 74 37" />
           </g>
+          <circle className="avatar__eye" cx="51" cy="43" r="2.6" fill="#222" />
+          <circle className="avatar__eye avatar__eye--r" cx="69" cy="43" r="2.6" fill="#222" />
           <path d="M52 60 Q60 64 68 60" stroke="#6b3b2a" strokeWidth="2" fill="none" />
         </g>
+        <circle className="avatar__hand" cx="88" cy="50" r="7" fill={look.skin} />
+        <rect
+          className="avatar__flip"
+          x="84"
+          y="80"
+          width="16"
+          height="22"
+          rx="2"
+          fill="#8c1c13"
+          stroke="#fff"
+        />
+        <text className="avatar__ahum" x="84" y="72" fontSize="10" fill="#fff">
+          ahum
+        </text>
       </svg>
       <div className="avatar__name">
         {nl.players[seat]}

@@ -2,7 +2,7 @@
 
 ## Status
 - [x] F1 Opzet  - [x] F2 Engine  - [x] F3 2D-tafel  - [x] F4 POV
-- [x] F5 Bot-AI  - [ ] F6 Seinen  - [ ] F7 Score/opslaan  - [ ] F8 Afwerking
+- [x] F5 Bot-AI  - [x] F6 Seinen  - [ ] F7 Score/opslaan  - [ ] F8 Afwerking
 
 ## S1 Doel
 First-person klaverjasgame in de browser. POV van één speler, maat tegenover, tegenstanders
@@ -50,6 +50,13 @@ Gevolgen: maat speelt op juiste of foute info; betrapt = waarschuwing, daarna st
 animatie, optioneel seinlog). Tegenstanders seinen onderling; "Ik zag dat!" roepen,
 terecht = straf voor hen, onterecht = kost jou iets. Vaker seinen maakt de tafel
 achterdochtiger. Alles in de engine, testbaar met seed.
+F6 (klaar): src/engine/signals.ts (sendSignal, accuse, botSignalIntent, applySignalPenalties,
+GESTURE_INFO met zichtbaarheid/opvallendheid). Bots spelen op hun overtuiging via de
+`hint` in smart.ts (uitkomen in geseinde kleur, troef voorspelen bij "troefboer").
+Keuzes: straf is 50 strafpunten of spel verbeurd (geen losse slag); "Ik zag dat!" geldt
+voor de huidige en vorige zet, onterecht = 25 punten voor de tegenpartij. Tegenstanders
+die een gebaar kennen betrappen het vaker, maar spelen nog niet actief op jullie seinen.
+UI: SignalSetup.tsx (afspraak), seinmenu en knop in TablePOV, gebaren in Avatar.tsx.
 
 ## S6 Bot-AI
 Altijd legaal. Heuristieken: troeven tellen, gevallen kaarten onthouden, roem en punten
