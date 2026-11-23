@@ -8,13 +8,16 @@ import {
   isGameOver,
   passBid,
   playCard,
-  simpleBotStep,
+  botStep,
+  type Difficulty,
   type Card,
   type GameState,
   type Suit,
 } from '../engine';
 
 const TRICK_PAUSE = 1400;
+/** Wordt in F7 een instelling. */
+const DIFFICULTY: Difficulty = 'gemiddeld';
 
 /** Bedenktijd: soms vlot, soms even twijfelen. */
 function thinkTime(rng: () => number, bidding: boolean): number {
@@ -44,7 +47,9 @@ export function useGame(seed: number) {
     const t = setTimeout(
       () =>
         setGame((g) =>
-          g.round.turn === 0 ? g : { ...g, round: simpleBotStep(g.round, g.rules, botRng.current) },
+          g.round.turn === 0
+            ? g
+            : { ...g, round: botStep(g.round, g.rules, botRng.current, DIFFICULTY) },
         ),
       thinkTime(botRng.current, round.phase === 'bieden'),
     );

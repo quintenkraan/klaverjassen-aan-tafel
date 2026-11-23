@@ -6,3 +6,6 @@ export * from './roem';
 export * from './round';
 export * from './game';
 export * from './ai/simple';
+export * from './ai/profile';
+export * from './ai/knowledge';
+export * from './ai/smart';

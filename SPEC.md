@@ -2,7 +2,7 @@
 
 ## Status
 - [x] F1 Opzet  - [x] F2 Engine  - [x] F3 2D-tafel  - [x] F4 POV
-- [ ] F5 Bot-AI  - [ ] F6 Seinen  - [ ] F7 Score/opslaan  - [ ] F8 Afwerking
+- [x] F5 Bot-AI  - [ ] F6 Seinen  - [ ] F7 Score/opslaan  - [ ] F8 Afwerking
 
 ## S1 Doel
 First-person klaverjasgame in de browser. POV van één speler, maat tegenover, tegenstanders
@@ -56,6 +56,10 @@ Altijd legaal. Heuristieken: troeven tellen, gevallen kaarten onthouden, roem en
 bijgooien bij maat, laag spelen als tegenstander hoog ligt. Troefkeuze via handwaardering.
 Persoonlijkheid: agressief/voorzichtig, geheugen, oplettendheid, seinneiging, eerlijkheid.
 Moeilijkheid: makkelijk/gemiddeld/sterk.
+F5 (klaar): src/engine/ai/profile.ts (Personality, PERSONALITIES per stoel, Difficulty),
+knowledge.ts (geheugen + renonces), smart.ts (handStrength, smartBotStep, botStep).
+attention/signalTendency/honesty staan klaar voor F6. Moeilijkheid staat nu vast op
+'gemiddeld' in src/ui/useGame.ts; in F7 een instelling.
 
 ## S7 Schermen en opslag
 Start (nieuw spel, instellingen, regels), seinafspraak, speltafel, ronde- en eindstand.
