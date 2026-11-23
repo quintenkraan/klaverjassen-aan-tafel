@@ -5,3 +5,4 @@ export * from './rules';
 export * from './roem';
 export * from './round';
 export * from './game';
+export * from './ai/simple';

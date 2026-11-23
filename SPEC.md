@@ -1,7 +1,7 @@
 # SPEC: Klaverjassen aan tafel
 
 ## Status
-- [x] F1 Opzet  - [x] F2 Engine  - [ ] F3 2D-tafel  - [ ] F4 POV
+- [x] F1 Opzet  - [x] F2 Engine  - [x] F3 2D-tafel  - [ ] F4 POV
 - [ ] F5 Bot-AI  - [ ] F6 Seinen  - [ ] F7 Score/opslaan  - [ ] F8 Afwerking
 
 ## S1 Doel
@@ -28,6 +28,10 @@ Gekozen in F2: niet kunnen overtroeven = niet ondertroeven (tenzij alleen troef)
 gelijk spel (81/81) is nat; vier gelijke telt voor elke rang; roem wordt automatisch
 geteld; speler na de deler komt altijd uit. API: src/engine/index.ts (startRound,
 bidOptions, passBid, chooseTrump, playableCards, playCard, finishRound, totals).
+
+F3 (klaar): src/ui/useGame.ts (state + bot-timing + pauze na slag), src/ui/Table2D.tsx,
+src/ui/CardView.tsx (SVG-kaart), bot in src/engine/ai/simple.ts. F4 vervangt Table2D
+door de POV-tafel en hergebruikt useGame en CardView.
 
 ## S4 POV en sfeer
 Schuine camera over tafel, eigen kaarten in waaier (hover tilt, klik/sleep speelt).

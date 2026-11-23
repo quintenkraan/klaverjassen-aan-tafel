@@ -29,9 +29,7 @@ export function legalCards(hand: Card[], trick: Trick, trump: Suit, variant: Var
     -1,
     ...trick.cards.filter((pc) => pc.card.suit === trump).map((pc) => strength(pc.card, trump)),
   );
-  const higherTrumps = hand.filter(
-    (c) => c.suit === trump && strength(c, trump) > highestTrump,
-  );
+  const higherTrumps = hand.filter((c) => c.suit === trump && strength(c, trump) > highestTrump);
 
   const follow = hand.filter((c) => c.suit === lead.card.suit);
   if (follow.length > 0) {

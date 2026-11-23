@@ -30,25 +30,33 @@ describe('trickWinner', () => {
 
 describe('legalCards', () => {
   it('bekennen verplicht', () => {
-    expect(legalCards(cs('k7', 'kA', 'h9'), trick(0, 'kB'), H, 'rotterdams')).toEqual(cs('k7', 'kA'));
+    expect(legalCards(cs('k7', 'kA', 'h9'), trick(0, 'kB'), H, 'rotterdams')).toEqual(
+      cs('k7', 'kA'),
+    );
   });
   it('troef gevraagd: overtroeven als het kan', () => {
     expect(legalCards(cs('h7', 'hB', 'kA'), trick(0, 'hV'), H, 'rotterdams')).toEqual(cs('hB'));
   });
   it('troef gevraagd, niet over kunnen: elke troef mag', () => {
-    expect(legalCards(cs('h7', 'h9', 'kA'), trick(0, 'hB'), H, 'rotterdams')).toEqual(cs('h7', 'h9'));
+    expect(legalCards(cs('h7', 'h9', 'kA'), trick(0, 'hB'), H, 'rotterdams')).toEqual(
+      cs('h7', 'h9'),
+    );
   });
   it('niet kunnen bekennen: troeven', () => {
     expect(legalCards(cs('r7', 'h8'), trick(0, 'kA'), H, 'rotterdams')).toEqual(cs('h8'));
   });
   it('al getroefd door tegenstander: overtroeven', () => {
-    expect(legalCards(cs('h7', 'h9', 'r8'), trick(0, 'kA', 'h10'), H, 'rotterdams')).toEqual(cs('h9'));
+    expect(legalCards(cs('h7', 'h9', 'r8'), trick(0, 'kA', 'h10'), H, 'rotterdams')).toEqual(
+      cs('h9'),
+    );
   });
   it('ondertroeven mag niet als je iets anders hebt', () => {
     expect(legalCards(cs('h7', 'r8'), trick(0, 'kA', 'h10'), H, 'rotterdams')).toEqual(cs('r8'));
   });
   it('ondertroeven mag als je alleen troef hebt', () => {
-    expect(legalCards(cs('h7', 'h8'), trick(0, 'kA', 'h10'), H, 'rotterdams')).toEqual(cs('h7', 'h8'));
+    expect(legalCards(cs('h7', 'h8'), trick(0, 'kA', 'h10'), H, 'rotterdams')).toEqual(
+      cs('h7', 'h8'),
+    );
   });
   it('maat heeft de slag: amsterdams vrij, rotterdams troefplicht', () => {
     const t = trick(0, 'kA', 'k7');
@@ -71,7 +79,8 @@ describe('roem', () => {
   it('vier op een rij 50', () => expect(roemOf(cs('kB', 'kV', 'kH', 'kA'), S)).toBe(50));
   it('stuk 20', () => expect(roemOf(cs('hH', 'hV', 'k7', 'r9'), H)).toBe(20));
   it('stuk telt bovenop reeks', () => expect(roemOf(cs('hV', 'hH', 'hA', 'k7'), H)).toBe(40));
-  it('H+V van niet-troef is geen stuk', () => expect(roemOf(cs('kH', 'kV', 'r7', 's9'), H)).toBe(0));
+  it('H+V van niet-troef is geen stuk', () =>
+    expect(roemOf(cs('kH', 'kV', 'r7', 's9'), H)).toBe(0));
   it('vier boeren 200, vier azen 100', () => {
     expect(roemOf(cs('kB', 'rB', 'hB', 'sB'), H)).toBe(200);
     expect(roemOf(cs('kA', 'rA', 'hA', 'sA'), H)).toBe(100);

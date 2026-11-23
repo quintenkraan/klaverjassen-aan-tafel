@@ -8,10 +8,24 @@ const TRUMP_ORDER: readonly Rank[] = ['7', '8', 'V', 'H', '10', 'A', '9', 'B'];
 const PLAIN_ORDER: readonly Rank[] = ['7', '8', '9', 'B', 'V', 'H', '10', 'A'];
 
 const TRUMP_POINTS: Record<Rank, number> = {
-  '7': 0, '8': 0, '9': 14, '10': 10, B: 20, V: 3, H: 4, A: 11,
+  '7': 0,
+  '8': 0,
+  '9': 14,
+  '10': 10,
+  B: 20,
+  V: 3,
+  H: 4,
+  A: 11,
 };
 const PLAIN_POINTS: Record<Rank, number> = {
-  '7': 0, '8': 0, '9': 0, '10': 10, B: 2, V: 3, H: 4, A: 11,
+  '7': 0,
+  '8': 0,
+  '9': 0,
+  '10': 10,
+  B: 2,
+  V: 3,
+  H: 4,
+  A: 11,
 };
 
 export function createDeck(): Card[] {
@@ -33,6 +47,14 @@ export function sameCard(a: Card, b: Card): boolean {
 
 export function cardId(card: Card): string {
   return `${card.suit}-${card.rank}`;
+}
+
+/** Hand sorteren voor weergave: troef eerst, kleuren afwisselend zwart/rood, hoog naar laag. */
+export function sortHand(hand: Card[], trump: Suit | null): Card[] {
+  const order: Suit[] = ['klaveren', 'ruiten', 'schoppen', 'harten'];
+  const suitRank = (s: Suit) => (s === trump ? -1 : order.indexOf(s));
+  const rankOf = (c: Card) => (c.suit === trump ? TRUMP_ORDER : PLAIN_ORDER).indexOf(c.rank);
+  return [...hand].sort((a, b) => suitRank(a.suit) - suitRank(b.suit) || rankOf(b) - rankOf(a));
 }
 
 export function nextSeat(seat: Seat): Seat {

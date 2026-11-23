@@ -121,12 +121,19 @@ describe('telling', () => {
     expect(scoreRound([done(0, 81), done(1, 81)], 0).nat).toBe(true);
   });
   it('pit: +100 bovenop roem', () => {
-    const tricks = [done(0, 152 - 7 * 10, 20), ...Array.from({ length: 6 }, () => done(2, 10)), done(0, 20)];
+    const tricks = [
+      done(0, 152 - 7 * 10, 20),
+      ...Array.from({ length: 6 }, () => done(2, 10)),
+      done(0, 20),
+    ];
     const s = scoreRound(tricks, 0);
     expect(s).toMatchObject({ pit: 0, nat: false, roem: [120, 0], total: [282, 0] });
   });
   it('pit door de tegenpartij', () => {
-    const s = scoreRound(Array.from({ length: 8 }, () => done(1, 20)), 0);
+    const s = scoreRound(
+      Array.from({ length: 8 }, () => done(1, 20)),
+      0,
+    );
     expect(s).toMatchObject({ pit: 1, nat: true, total: [0, 262] });
   });
 });

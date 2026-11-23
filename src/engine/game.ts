@@ -38,7 +38,8 @@ export function isGameOver(game: GameState): boolean {
 /** Telt het afgelopen spel en deelt het volgende (tenzij het potje voorbij is). */
 export function finishRound(game: GameState): GameState {
   const { round } = game;
-  if (round.phase !== 'klaar' || round.playingTeam === null) throw new Error('Spel is nog niet klaar');
+  if (round.phase !== 'klaar' || round.playingTeam === null)
+    throw new Error('Spel is nog niet klaar');
   const roundIndex = game.roundIndex + 1;
   const next: GameState = {
     ...game,
@@ -48,6 +49,10 @@ export function finishRound(game: GameState): GameState {
   if (isGameOver(next)) return next;
   return {
     ...next,
-    round: startRound(nextSeat(round.dealer), game.rules, createRng(roundSeed(game.seed, roundIndex))),
+    round: startRound(
+      nextSeat(round.dealer),
+      game.rules,
+      createRng(roundSeed(game.seed, roundIndex)),
+    ),
   };
 }

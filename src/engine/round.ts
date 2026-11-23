@@ -77,7 +77,8 @@ export function passBid(state: RoundState, rules: Rules, seat: Seat): RoundState
 
 export function chooseTrump(state: RoundState, rules: Rules, seat: Seat, suit: Suit): RoundState {
   assertTurn(state, seat, 'bieden');
-  if (!bidOptions(state, rules).suits.includes(suit)) throw new Error(`Troef ${suit} mag hier niet`);
+  if (!bidOptions(state, rules).suits.includes(suit))
+    throw new Error(`Troef ${suit} mag hier niet`);
   const first = nextSeat(state.dealer);
   return {
     ...state,
