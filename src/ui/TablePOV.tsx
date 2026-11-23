@@ -4,20 +4,25 @@ import { nl } from '../i18n/nl';
 import { Avatar } from './Avatar';
 import { HandFan } from './HandFan';
 import { GameOverOverlay, LastTrickPopup, RoundOverlay, ScoreSheet, SignalLog } from './Panels';
-import type { TableConfig } from './SignalSetup';
 import { sound } from './sound';
+import type { TableConfig } from './storage';
 import { TrickArea } from './TrickArea';
 import { useGame } from './useGame';
 import { useTalk } from './useTalk';
+import type { GameState } from '../engine';
+
+interface Props {
+  seed: number;
+  config: TableConfig;
+  /** Opgeslagen potje om te hervatten. */
+  initial?: GameState;
+  onExit: () => void;
+}
 
 /** First-person tafel: jij onderin, maat tegenover, tegenstanders links en rechts. */
-export function TablePOV({
-  seed,
-  rules: startRules,
-  agreement,
-  showLog,
-}: TableConfig & { seed: number }) {
-  const g = useGame(seed, startRules, agreement);
+export function TablePOV({ seed, config, initial, onExit }: Props) {
+  const { agreement, showLog } = config;
+  const g = useGame(seed, config, initial);
   const { game, pause, over, play, pass, choose, nextRound, newGame, gesture, nod, line } = g;
   const talk = useTalk(game, seed);
   const speech = line && (!talk || line.id > talk.id) ? line : talk;
@@ -68,6 +73,9 @@ export function TablePOV({
           </span>
           <span className="info__status">{status}</span>
           <span className="info__buttons">
+            <button type="button" onClick={onExit}>
+              {nl.menu}
+            </button>
             <button type="button" disabled={!lastTrick} onClick={() => setShowLast(true)}>
               {nl.lastTrick}
             </button>

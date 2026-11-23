@@ -1,27 +1,109 @@
 import { useState } from 'react';
+import { isGameOver, totals, type GameState } from './engine';
 import { nl } from './i18n/nl';
-import { SignalSetup, type TableConfig } from './ui/SignalSetup';
+import { RulesScreen } from './ui/RulesScreen';
+import { SettingsScreen } from './ui/SettingsScreen';
+import { SignalSetup } from './ui/SignalSetup';
+import {
+  clearGame,
+  configFrom,
+  loadGame,
+  loadSettings,
+  saveSettings,
+  type TableConfig,
+} from './ui/storage';
 import { TablePOV } from './ui/TablePOV';
 
 type Stage =
-  { kind: 'start' } | { kind: 'setup' } | { kind: 'play'; seed: number; cfg: TableConfig };
+  | { kind: 'start' }
+  | { kind: 'settings' }
+  | { kind: 'rules' }
+  | { kind: 'setup' }
+  | { kind: 'play'; seed: number; config: TableConfig; initial?: GameState };
 
 export function App() {
   const [stage, setStage] = useState<Stage>({ kind: 'start' });
+  const [settings, setSettings] = useState(loadSettings);
+  const [saved, setSaved] = useState(loadGame);
+  const toStart = () => {
+    setSaved(loadGame());
+    setStage({ kind: 'start' });
+  };
 
-  if (stage.kind === 'play') return <TablePOV seed={stage.seed} {...stage.cfg} />;
-  if (stage.kind === 'setup') {
-    return (
-      <SignalSetup onStart={(cfg) => setStage({ kind: 'play', seed: Date.now() >>> 0, cfg })} />
-    );
+  const startNew = (agreement = settings.agreement) => {
+    const next = { ...settings, agreement };
+    setSettings(next);
+    saveSettings(next);
+    clearGame();
+    setStage({ kind: 'play', seed: Date.now() >>> 0, config: configFrom(next) });
+  };
+
+  switch (stage.kind) {
+    case 'play':
+      return (
+        <TablePOV
+          key={stage.seed}
+          seed={stage.seed}
+          config={stage.config}
+          initial={stage.initial}
+          onExit={toStart}
+        />
+      );
+    case 'settings':
+      return (
+        <SettingsScreen
+          settings={settings}
+          onBack={toStart}
+          onSave={(s) => {
+            setSettings(s);
+            saveSettings(s);
+            toStart();
+          }}
+        />
+      );
+    case 'rules':
+      return <RulesScreen onBack={toStart} />;
+    case 'setup':
+      return <SignalSetup initial={settings.agreement} onStart={startNew} onBack={toStart} />;
   }
+
+  const canResume = saved && !isGameOver(saved.game);
+  const [us, them] = canResume ? totals(saved.game) : [0, 0];
   return (
     <main className="start">
       <h1>{nl.title}</h1>
       <p>{nl.subtitle}</p>
-      <button type="button" onClick={() => setStage({ kind: 'setup' })}>
-        {nl.newGame}
-      </button>
+      <div className="start__buttons">
+        {canResume && (
+          <button
+            type="button"
+            onClick={() =>
+              setStage({
+                kind: 'play',
+                seed: saved.game.seed,
+                config: saved.config,
+                initial: saved.game,
+              })
+            }
+          >
+            {nl.resume}
+            <small>{nl.resumeInfo(saved.game.scores.length, us, them)}</small>
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => (settings.signals.enabled ? setStage({ kind: 'setup' }) : startNew())}
+        >
+          {nl.newGame}
+          {canResume && <small>{nl.newGameWarning}</small>}
+        </button>
+        <button type="button" className="ghost" onClick={() => setStage({ kind: 'settings' })}>
+          {nl.settings}
+        </button>
+        <button type="button" className="ghost" onClick={() => setStage({ kind: 'rules' })}>
+          {nl.rulesTitle}
+        </button>
+      </div>
     </main>
   );
 }

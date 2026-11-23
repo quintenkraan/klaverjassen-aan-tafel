@@ -41,6 +41,95 @@ export const nl = {
   close: 'Sluiten',
   wonBy: (name: string) => `${name} pakte hem`,
   dragHint: 'Klik of sleep een kaart naar het midden',
+  resume: 'Verder spelen',
+  resumeInfo: (played: number, us: number, them: number) =>
+    `${played} ${played === 1 ? 'spel' : 'spellen'} gespeeld, wij ${us} - zij ${them}`,
+  settings: 'Instellingen',
+  rulesTitle: 'Spelregels',
+  back: 'Terug',
+  save: 'Opslaan',
+  menu: 'Menu',
+  newGameWarning: 'Je opgeslagen potje wordt dan overschreven.',
+  set: {
+    variant: 'Variant',
+    amsterdams: 'Amsterdams (maat heeft de slag: niet hoeven troeven)',
+    rotterdams: 'Rotterdams (altijd troeven en overtroeven)',
+    trumpMode: 'Troef bepalen',
+    verplicht: 'Verplicht: speler na de deler kiest',
+    vrij: 'Vrij: om de beurt kiezen of passen',
+    utrechts: 'Utrechts: voorgestelde kleur spelen of passen',
+    length: 'Lengte van een potje',
+    lengths: {
+      s16: '16 spellen',
+      s8: '8 spellen (kort potje)',
+      p1000: 'Tot 1000 punten',
+      p1500: 'Tot 1500 punten',
+    } as Record<string, string>,
+    difficulty: 'Tegenstanders',
+    makkelijk: 'Makkelijk',
+    gemiddeld: 'Gemiddeld',
+    sterk: 'Sterk',
+    signals: 'Seinen',
+  },
+  rules: [
+    {
+      title: 'Het spel',
+      lines: [
+        'Je speelt met z’n vieren, twee tegen twee. Ome Henk zit tegenover je en is je maat.',
+        'Er wordt gespeeld met 32 kaarten (7 tot en met aas). Iedereen krijgt er acht.',
+        'Eén speler kiest troef. Zijn team moet daarna meer dan de helft van de punten halen.',
+      ],
+    },
+    {
+      title: 'Bekennen en troeven',
+      lines: [
+        'Je moet de gevraagde kleur bijspelen (bekennen).',
+        'Kun je niet bekennen, dan moet je troeven. Ligt er al troef, dan moet je overtroeven.',
+        'Kun je niet overtroeven, dan mag je niet ondertroeven, tenzij je alleen nog troef hebt.',
+        'Amsterdams: heeft je maat de slag al, dan hoef je niet te troeven.',
+      ],
+    },
+    {
+      title: 'Punten',
+      lines: [
+        'Troef: boer 20, negen 14, aas 11, tien 10, heer 4, vrouw 3.',
+        'Andere kleuren: aas 11, tien 10, heer 4, vrouw 3, boer 2.',
+        'De laatste slag levert 10 extra op. Samen is dat 162.',
+      ],
+    },
+    {
+      title: 'Roem',
+      lines: [
+        'Drie op een rij in één slag: 20. Vier op een rij: 50.',
+        'Heer en vrouw van troef in één slag (stuk): 20.',
+        'Vier gelijke kaarten: 100. Vier boeren: 200.',
+        'Alle acht slagen (pit): 100 extra.',
+      ],
+    },
+    {
+      title: 'Nat',
+      lines: [
+        'Haalt het team dat troef koos niet meer dan de helft van alle punten plus roem, dan is het nat.',
+        'De tegenpartij krijgt dan 162 plus alle roem.',
+      ],
+    },
+    {
+      title: 'Seinen',
+      lines: [
+        'Spreek vooraf met Henk af wat elk gebaar betekent. Seinen doe je met de knop linksonder.',
+        'Henk ziet het niet altijd en begrijpt het niet altijd goed. Knikt hij, dan zag hij iets.',
+        'Tante Ria en Sjaak letten op. Eerst krijg je een waarschuwing, daarna straf.',
+        'Zie je de tegenstanders seinen, druk dan meteen op "Ik zag dat!". Onterecht kost je punten.',
+      ],
+    },
+    {
+      title: 'Bediening',
+      lines: [
+        'Klik op een kaart of sleep hem omhoog naar het midden.',
+        'Je potje wordt automatisch bewaard. Via "Menu" ga je terug naar het startscherm.',
+      ],
+    },
+  ],
   signal: 'Seinen',
   accuse: 'Ik zag dat!',
   gestures: {

@@ -298,6 +298,60 @@ button:disabled {
   margin: 0;
 }
 
+/* Start, instellingen en regels */
+.start__buttons {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+.start__buttons button {
+  min-width: 240px;
+  display: grid;
+  gap: 2px;
+}
+.start__buttons small {
+  opacity: 0.7;
+  font-size: 0.8rem;
+}
+button.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid rgb(255 255 255 / 0.4);
+}
+.choice {
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: grid;
+  gap: 6px;
+}
+.choice legend {
+  font-weight: 600;
+  padding: 0 4px;
+}
+.choice label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.setup__buttons {
+  display: flex;
+  gap: 10px;
+}
+.rules h2 {
+  font-size: 1.1rem;
+  margin: 8px 0 4px;
+  color: var(--gold);
+}
+.rules ul {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.5;
+}
+body:has(.start) {
+  overflow: auto;
+}
+
 /* Seinafspraak */
 .setup {
   min-height: 100vh;

@@ -2,7 +2,7 @@
 
 ## Status
 - [x] F1 Opzet  - [x] F2 Engine  - [x] F3 2D-tafel  - [x] F4 POV
-- [x] F5 Bot-AI  - [x] F6 Seinen  - [ ] F7 Score/opslaan  - [ ] F8 Afwerking
+- [x] F5 Bot-AI  - [x] F6 Seinen  - [x] F7 Score/opslaan  - [ ] F8 Afwerking
 
 ## S1 Doel
 First-person klaverjasgame in de browser. POV van één speler, maat tegenover, tegenstanders
@@ -71,6 +71,9 @@ attention/signalTendency/honesty staan klaar voor F6. Moeilijkheid staat nu vast
 ## S7 Schermen en opslag
 Start (nieuw spel, instellingen, regels), seinafspraak, speltafel, ronde- en eindstand.
 localStorage om te hervatten. Desktop, tablet, mobiel landschap. Toetsenbordbediening.
+F7 (klaar): src/ui/storage.ts (Settings, TableConfig, load/save met validatie, potje
+bewaren per zet), SettingsScreen.tsx, RulesScreen.tsx, App.tsx (start, hervatten,
+"Menu" aan tafel). Toetsenbordbediening en mobiele afwerking zitten in F8.
 
 ## S8 Later (niet bouwen, wel ruimte voor houden)
 Online multiplayer, volledige 3D, statistieken.

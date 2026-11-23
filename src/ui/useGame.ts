@@ -13,12 +13,9 @@ import {
   playCard,
   sendSignal,
   teamOf,
-  type Agreement,
   type Card,
-  type Difficulty,
   type GameState,
   type Gesture,
-  type Rules,
   type Seat,
   type SignalEvent,
   type Suit,
@@ -26,11 +23,10 @@ import {
 import { nl } from '../i18n/nl';
 import type { Speech } from './Avatar';
 import { sound } from './sound';
+import { clearGame, saveGame, type TableConfig } from './storage';
 
 const TRICK_PAUSE = 1400;
 const GESTURE_TIME = 1400;
-/** Wordt in F7 een instelling. */
-const DIFFICULTY: Difficulty = 'gemiddeld';
 
 export interface GestureAnim {
   seat: Seat;
@@ -47,8 +43,11 @@ function thinkTime(rng: () => number, bidding: boolean): number {
 }
 
 /** Spelstatus, bots en seinen. De UI roept alleen deze acties aan; regels zitten in de engine. */
-export function useGame(seed: number, rules: Rules, agreement: Agreement) {
-  const [game, setGame] = useState<GameState>(() => createGame(rules, seed, 3, agreement));
+export function useGame(seed: number, config: TableConfig, initial?: GameState) {
+  const { rules, agreement, difficulty } = config;
+  const [game, setGame] = useState<GameState>(
+    () => initial ?? createGame(rules, seed, 3, agreement),
+  );
   const [ackedKey, setAckedKey] = useState('');
   const [gesture, setGesture] = useState<GestureAnim | null>(null);
   const [nod, setNod] = useState(false);
@@ -58,9 +57,12 @@ export function useGame(seed: number, rules: Rules, agreement: Agreement) {
   const sigRng = useRef(createRng(seed ^ 0x51c));
   const ids = useRef(1);
 
+  // Bijhouden voor timers, en het potje bewaren zodat je later verder kunt.
   useEffect(() => {
     gameRef.current = game;
-  }, [game]);
+    if (isGameOver(game)) clearGame();
+    else saveGame({ version: 1, game, config });
+  }, [game, config]);
 
   const round = game.round;
   const trickKey = `${game.roundIndex}:${round.tricks.length}`;
@@ -134,7 +136,7 @@ export function useGame(seed: number, rules: Rules, agreement: Agreement) {
           }
         }
         const hint = g.signals.beliefs[seat] ?? null;
-        setGame({ ...g, round: botStep(g.round, g.rules, botRng.current, DIFFICULTY, hint) });
+        setGame({ ...g, round: botStep(g.round, g.rules, botRng.current, difficulty, hint) });
       },
       thinkTime(botRng.current, round.phase === 'bieden'),
     );
