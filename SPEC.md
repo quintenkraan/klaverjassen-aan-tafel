@@ -1,7 +1,7 @@
 # SPEC: Klaverjassen aan tafel
 
 ## Status
-- [x] F1 Opzet  - [ ] F2 Engine  - [ ] F3 2D-tafel  - [ ] F4 POV
+- [x] F1 Opzet  - [x] F2 Engine  - [ ] F3 2D-tafel  - [ ] F4 POV
 - [ ] F5 Bot-AI  - [ ] F6 Seinen  - [ ] F7 Score/opslaan  - [ ] F8 Afwerking
 
 ## S1 Doel
@@ -24,6 +24,10 @@ Laatste slag +10 (totaal 162). Roem per slag: 3 op rij 20, 4 op rij 50, stuk 20,
 Varianten: Amsterdams / Rotterdams; troef verplicht rondgaand / Utrechts / vrij;
 16 spellen of tot puntenlimiet. Elke regel en randgeval getest (ondertroeven,
 roem in laatste slag, nat met roem, pit met roem).
+Gekozen in F2: niet kunnen overtroeven = niet ondertroeven (tenzij alleen troef);
+gelijk spel (81/81) is nat; vier gelijke telt voor elke rang; roem wordt automatisch
+geteld; speler na de deler komt altijd uit. API: src/engine/index.ts (startRound,
+bidOptions, passBid, chooseTrump, playableCards, playCard, finishRound, totals).
 
 ## S4 POV en sfeer
 Schuine camera over tafel, eigen kaarten in waaier (hover tilt, klik/sleep speelt).
