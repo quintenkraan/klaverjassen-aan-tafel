@@ -152,6 +152,9 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
               gesture={gesture}
               nodSeat={nodding ? 2 : null}
               label={tableLabel}
+              myCards={hand}
+              playable={playable}
+              onPlay={play}
             />
           </Suspense>
         )}
@@ -187,7 +190,9 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
           </div>
         )}
 
-        <div className={`me ${myTurn ? 'me--turn' : ''}`}>
+        <div
+          className={`me ${myTurn ? 'me--turn' : ''} ${use3d && gesture?.seat !== 0 ? 'sr-only' : ''}`}
+        >
           {gesture?.seat === 0 ? (
             nl.youDid(nl.gestures[gesture.gesture])
           ) : (
@@ -227,12 +232,15 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
             </button>
           </>
         )}
-        <HandFan
-          cards={hand}
-          playable={playable}
-          active={myTurn && round.phase === 'spelen'}
-          onPlay={play}
-        />
+        {/* In 3D zitten je kaarten in je handen; de HTML-waaier blijft voor schermlezers en Tab. */}
+        <div className={use3d ? 'sr-only' : undefined}>
+          <HandFan
+            cards={hand}
+            playable={playable}
+            active={myTurn && round.phase === 'spelen'}
+            onPlay={play}
+          />
+        </div>
 
         {showLast && lastTrick && (
           <LastTrickPopup trick={lastTrick} onClose={() => setShowLast(false)} />

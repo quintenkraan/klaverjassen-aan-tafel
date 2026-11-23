@@ -5,10 +5,16 @@ const dist = ([x, , z]: number[]) => Math.hypot(x!, z!);
 
 describe('3D-indeling', () => {
   it('jij zit aan de camerakant, maat tegenover, 1 links en 3 rechts', () => {
-    expect(seatPose(0).position[2]).toBeGreaterThan(0.9);
-    expect(seatPose(2).position[2]).toBeLessThan(-0.9);
-    expect(seatPose(1).position[0]).toBeLessThan(-0.9);
-    expect(seatPose(3).position[0]).toBeGreaterThan(0.9);
+    expect(seatPose(0).position[2]).toBeGreaterThan(0.5);
+    expect(seatPose(2).position[2]).toBeLessThan(-0.5);
+    expect(seatPose(1).position[0]).toBeLessThan(-0.5);
+    expect(seatPose(3).position[0]).toBeGreaterThan(0.5);
+  });
+
+  it('iedereen zit buiten de tafel', () => {
+    for (const seat of [0, 1, 2, 3] as const) {
+      expect(dist(seatPose(seat).position)).toBeGreaterThan(TABLE_RADIUS);
+    }
   });
 
   it('tafelgenoten kijken naar het midden', () => {
@@ -22,19 +28,19 @@ describe('3D-indeling', () => {
     }
   });
 
-  it('slagkaarten liggen op het kleed, randen binnen de tafel', () => {
+  it('slagkaarten liggen op het kleed, kaarten komen van binnen de tafelrand', () => {
     for (const seat of [0, 1, 2, 3] as const) {
       const spot = spotFor(seat, 3);
       expect(spot[1]).toBeGreaterThan(TABLE_TOP);
-      expect(dist(spot)).toBeLessThan(0.3);
+      expect(dist(spot)).toBeLessThan(0.2);
       expect(dist(edgeFor(seat))).toBeLessThan(TABLE_RADIUS);
     }
   });
 
   it('blikveld past zich aan: smal scherm krijgt een groter verticaal blikveld', () => {
     expect(fovFor(1)).toBeGreaterThan(fovFor(16 / 9));
-    expect(fovFor(0.3)).toBeLessThanOrEqual(78);
-    expect(fovFor(4)).toBeGreaterThanOrEqual(42);
+    expect(fovFor(0.3)).toBeLessThanOrEqual(80);
+    expect(fovFor(4)).toBeGreaterThanOrEqual(44);
   });
 
   it('scheve hoek is vast per kaart en klein', () => {

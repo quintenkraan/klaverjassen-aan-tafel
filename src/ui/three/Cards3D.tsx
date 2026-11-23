@@ -1,8 +1,8 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { DoubleSide, Euler, Quaternion, Vector3, type Group } from 'three';
+import { Euler, Quaternion, Vector3, type Group } from 'three';
 import { cardId, type Card, type PlayedCard, type Seat, type Trick } from '../../engine';
-import { CARD_H, CARD_W, edgeFor, HELD_H, HELD_W, spotFor, tiltFor, type Vec3 } from './layout';
+import { CARD_H, CARD_W, edgeFor, spotFor, tiltFor, type Vec3 } from './layout';
 import { cardTexture } from './textures';
 
 interface CardProps {
@@ -87,28 +87,5 @@ export function TrickCards({ trick, winner }: { trick: Trick | undefined; winner
         />
       ))}
     </>
-  );
-}
-
-/** Kaarten in de hand van een tafelgenoot (je ziet de achterkant), als waaier. */
-export function HeldCards({ count }: { count: number }) {
-  const back = cardTexture(null);
-  const spread = Math.min(0.18, 0.9 / Math.max(count, 1));
-  return (
-    <group position={[0, 1.02, 0.24]} rotation-x={-0.35}>
-      {Array.from({ length: count }, (_, i) => {
-        const a = (i - (count - 1) / 2) * spread;
-        return (
-          <mesh
-            key={i}
-            position={[Math.sin(a) * 0.09, Math.cos(a) * 0.09 - 0.09, i * 0.002]}
-            rotation-z={-a}
-          >
-            <planeGeometry args={[HELD_W, HELD_H]} />
-            <meshStandardMaterial map={back} side={DoubleSide} roughness={0.7} />
-          </mesh>
-        );
-      })}
-    </group>
   );
 }
