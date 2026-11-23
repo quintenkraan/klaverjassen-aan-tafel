@@ -6,7 +6,8 @@ import { nl } from '../../i18n/nl';
 import type { Speech } from '../Avatar';
 import { Cafe } from './Cafe';
 import { TrickCards } from './Cards3D';
-import { fovFor, seatPose, TABLE_TOP } from './layout';
+import { fovFor, LOOK_AT, seatPose } from './layout';
+import { isLookingAway, lookBy, lookReset } from './look';
 import { preloadModels, useClips, type AnimKey, type PersonKey } from './models';
 import { Person } from './Person';
 
@@ -46,8 +47,9 @@ function Lens() {
 /** Tijdens het laden van de mensen: vaste camera op ooghoogte. */
 function FallbackCamera() {
   useFrame(({ camera }) => {
-    camera.position.set(0, 1.22, 0.86);
-    camera.lookAt(0, TABLE_TOP + 0.02, -0.12);
+    const [x, , z] = seatPose(0).position;
+    camera.position.set(x, 1.2, z + 0.1);
+    camera.lookAt(...LOOK_AT);
   });
   return null;
 }
@@ -62,8 +64,8 @@ function TagProjector({ tags }: { tags: RefObject<(HTMLDivElement | null)[]> }) 
     () =>
       BOTS.map((seat) => {
         const [x, , z] = seatPose(seat).position;
-        // Buren zitten dichterbij en komen dus hoger in beeld: hun bordje iets lager.
-        return new Vector3(x, seat === 2 ? 1.33 : 1.2, z);
+        // Sjaak zit naast je op de bank en komt dus hoger in beeld: zijn bordje iets lager.
+        return new Vector3(x, seat === 3 ? 1.22 : 1.33, z);
       }),
     [],
   );
@@ -168,8 +170,33 @@ export default function Scene3D(props: Scene3DProps) {
     [],
   );
   const tags = useRef<(HTMLDivElement | null)[]>([]);
+  // Slepen = rondkijken. Een klik (zonder slepen) blijft een klik op een kaart.
+  const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+  const [away, setAway] = useState(false);
   return (
-    <div className="scene3d" role="region" aria-label={props.label}>
+    <div
+      className="scene3d"
+      role="region"
+      aria-label={props.label}
+      onPointerDown={(e) => {
+        drag.current = { x: e.clientX, y: e.clientY, moved: false };
+      }}
+      onPointerMove={(e) => {
+        const d = drag.current;
+        if (!d || !(e.buttons & 1)) return;
+        const dx = e.clientX - d.x;
+        const dy = e.clientY - d.y;
+        if (!d.moved && Math.hypot(dx, dy) < 6) return;
+        d.moved = true;
+        lookBy(dx, dy);
+        d.x = e.clientX;
+        d.y = e.clientY;
+        setAway(isLookingAway());
+      }}
+      onPointerUp={() => {
+        drag.current = null;
+      }}
+    >
       <Canvas
         shadows
         dpr={[1, 2]}
@@ -183,6 +210,19 @@ export default function Scene3D(props: Scene3DProps) {
         </Suspense>
         <TagProjector tags={tags} />
       </Canvas>
+
+      {away && (
+        <button
+          type="button"
+          className="look-back"
+          onClick={() => {
+            lookReset();
+            setAway(false);
+          }}
+        >
+          {nl.lookBack}
+        </button>
+      )}
 
       {BOTS.map((seat, i) => {
         const speech = props.speech?.seat === seat ? props.speech : null;

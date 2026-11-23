@@ -1,23 +1,66 @@
 import type { Seat } from '../../engine';
 
-/** Maten in meters, op echte schaal (kaarten iets groter dan echt, voor leesbaarheid). */
+/**
+ * Plattegrond van het café (meters). x: links (-) naar rechts (+), z: achterwand (-) naar
+ * de straat (+). Jullie tafel staat links achterin bij het raam, tegen de spiegelwand.
+ */
+export const ROOM = { minX: -4, maxX: 4, minZ: -9, maxZ: 9, height: 3.2 };
+
 export const TABLE_TOP = 0.76;
-export const TABLE_RADIUS = 0.58;
+/** Speeltafel: rechthoekig, voor de bank. */
+export const TABLE = { x: -2.9, z: -7.98, w: 1.0, d: 0.84 };
+export const BENCH_Z = -8.64;
+const CHAIR_Z = -7.3;
+/** Afstand tussen twee mensen naast elkaar aan dezelfde kant. */
+const HALF = 0.3;
+
 export const CARD_W = 0.085;
 export const CARD_H = 0.12;
 export const HELD_W = 0.063;
 export const HELD_H = 0.088;
-/** Afstand van het midden van de tafel tot het midden van de stoel. */
-export const SEAT_DISTANCE = 0.88;
-/** Linker- en rechterbuur iets naar achteren, zodat ze in beeld passen (zoals in kaartspellen). */
-const SIDE_SHIFT = 0.32;
 
 export type Vec3 = [number, number, number];
 
-/** Hoek rond de tafel. Jij (0) zit aan de camerakant (+z), 1 links, 2 tegenover, 3 rechts. */
-export function seatAngle(seat: Seat): number {
-  return [0, -Math.PI / 2 - SIDE_SHIFT, Math.PI, Math.PI / 2 + SIDE_SHIFT][seat]!;
+/**
+ * Waar iedereen zit. Jij (0) en Sjaak (3, rechts van je) op de bank met de spiegel in de rug,
+ * Tante Ria (1) tegenover jou en Ome Henk (2, je maat) schuin tegenover: maten zitten diagonaal
+ * en de speelvolgorde 0-1-2-3 gaat netjes rond de tafel.
+ */
+const SEATS: Record<Seat, { x: number; z: number; facing: number }> = {
+  0: { x: TABLE.x + HALF, z: BENCH_Z, facing: 0 },
+  1: { x: TABLE.x + HALF, z: CHAIR_Z, facing: Math.PI },
+  2: { x: TABLE.x - HALF, z: CHAIR_Z, facing: Math.PI },
+  3: { x: TABLE.x - HALF, z: BENCH_Z, facing: 0 },
+};
+
+/** Positie van een persoon (op de vloer) en de draaiing (model kijkt naar +z bij 0). */
+export function seatPose(seat: Seat): { position: Vec3; rotationY: number } {
+  const s = SEATS[seat];
+  return { position: [s.x, 0, s.z], rotationY: s.facing };
 }
+
+/** Zit deze speler op de bank (tegen de wand) in plaats van op een stoel? */
+export function onBench(seat: Seat): boolean {
+  return SEATS[seat].z === BENCH_Z;
+}
+
+function toward(seat: Seat, t: number, y: number): Vec3 {
+  const s = SEATS[seat];
+  return [TABLE.x + (s.x - TABLE.x) * t, y, TABLE.z + (s.z - TABLE.z) * t];
+}
+
+/** Waar de kaart van deze speler in de slag op tafel komt te liggen. */
+export function spotFor(seat: Seat, order: number): Vec3 {
+  return toward(seat, 0.33, TABLE_TOP + 0.006 + order * 0.002);
+}
+
+/** Bij de handen van deze speler: waar een kaart vandaan komt en heen gaat. */
+export function edgeFor(seat: Seat): Vec3 {
+  return toward(seat, 0.8, TABLE_TOP + 0.18);
+}
+
+/** Waar je standaard naar kijkt: recht vooruit over de tafel, iets naar het midden toe. */
+export const LOOK_AT: Vec3 = [SEATS[0].x - 0.1, TABLE_TOP - 0.02, TABLE.z + 0.12];
 
 /** Verticaal blikveld zodat er horizontaal steeds ongeveer 84 graden in beeld is. */
 export function fovFor(aspect: number): number {
@@ -26,24 +69,14 @@ export function fovFor(aspect: number): number {
   return Math.min(80, Math.max(44, v));
 }
 
-function around(seat: Seat, r: number, y: number): Vec3 {
-  const a = seatAngle(seat);
-  return [Math.sin(a) * r, y, Math.cos(a) * r];
-}
+/** Rondkijken: grenzen voor draaien (links/rechts) en knikken (op/neer), in radialen. */
+export const LOOK_LIMITS = { yaw: 2.4, pitchUp: 0.75, pitchDown: 0.6 };
 
-/** Waar de kaart van deze speler in de slag op het kleed komt te liggen. */
-export function spotFor(seat: Seat, order: number): Vec3 {
-  return around(seat, 0.11, TABLE_TOP + 0.006 + order * 0.002);
-}
-
-/** Bij de handen van deze speler: waar een kaart vandaan komt en heen gaat. */
-export function edgeFor(seat: Seat): Vec3 {
-  return around(seat, 0.5, TABLE_TOP + 0.18);
-}
-
-/** Positie van een stoel/persoon (op de vloer) en de draaiing zodat hij naar het midden kijkt. */
-export function seatPose(seat: Seat): { position: Vec3; rotationY: number } {
-  return { position: around(seat, SEAT_DISTANCE, 0), rotationY: seatAngle(seat) + Math.PI };
+export function clampLook(yaw: number, pitch: number): [number, number] {
+  return [
+    Math.max(-LOOK_LIMITS.yaw, Math.min(LOOK_LIMITS.yaw, yaw)),
+    Math.max(-LOOK_LIMITS.pitchDown, Math.min(LOOK_LIMITS.pitchUp, pitch)),
+  ];
 }
 
 /** Vaste, licht scheve hoek per kaart, zodat het eruitziet als neergegooid. */

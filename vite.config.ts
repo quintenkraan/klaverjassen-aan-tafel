@@ -7,6 +7,6 @@ export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
   // De 3D-tafel (three.js) is bewust één losse chunk die pas aan tafel geladen wordt.
-  build: { chunkSizeWarningLimit: 1000 },
+  build: { chunkSizeWarningLimit: 1600 },
   test: { include: ['src/**/*.test.ts'] },
 });

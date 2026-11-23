@@ -13,7 +13,8 @@ import {
   type Mesh,
 } from 'three';
 import type { Gesture, Seat } from '../../engine';
-import { HELD_H, HELD_W, seatPose, TABLE_TOP } from './layout';
+import { HELD_H, HELD_W, LOOK_AT, seatPose, TABLE_TOP } from './layout';
+import { look, lookStep } from './look';
 import {
   findBone,
   lowerFor,
@@ -147,8 +148,8 @@ export function Person({
     if (w > 0.01 && armL && foreL && left && armR && foreR && right) {
       const fwd = tmp.fwd.set(Math.sin(rotationY), 0, Math.cos(rotationY));
       const side = tmp.side.set(-Math.cos(rotationY), 0, Math.sin(rotationY)); // jouw rechts
-      const reach = isPlayer ? 0.27 : 0.3;
-      const height = isPlayer ? 0.97 : 0.95;
+      const reach = isPlayer ? 0.32 : 0.32;
+      const height = isPlayer ? 0.96 : 0.95;
       const chest = tmp.chest.set(position[0], height, position[2]).addScaledVector(fwd, reach);
       const saved = [armL, foreL, armR, foreR].map((bn) => bn.quaternion.clone());
       for (const [arm, fore, hand, s] of [
@@ -205,12 +206,19 @@ export function Person({
     }
 
     if (isPlayer && bones.head) {
-      // Jouw ogen: net voor en boven het hoofdbot. Het hoofd zelf is verborgen.
-      // Ogen: ~10 cm boven het hoofdbot en iets naar voren (jij kijkt richting -z).
+      // Jouw ogen: ~10 cm boven het hoofdbot en iets naar voren. Het hoofd zelf is verborgen.
       bones.head.getWorldPosition(a);
-      eye.set(a.x, a.y + 0.1, a.z - 0.08);
+      eye.set(a.x + Math.sin(rotationY) * 0.08, a.y + 0.1, a.z + Math.cos(rotationY) * 0.08);
       camera.position.lerp(eye, 0.5);
-      camera.lookAt(0, TABLE_TOP - 0.05, -0.05);
+      // Standaard kijk je naar de tafel; slepen draait je hoofd (look.ts).
+      lookStep(dt);
+      const dx = LOOK_AT[0] - camera.position.x;
+      const dy = LOOK_AT[1] - camera.position.y;
+      const dz = LOOK_AT[2] - camera.position.z;
+      const yaw = Math.atan2(dx, dz) + look.yaw;
+      const pitch = Math.atan2(dy, Math.hypot(dx, dz)) + look.pitch;
+      b.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
+      camera.lookAt(b.add(camera.position));
       bones.head.scale.setScalar(0.001);
     }
 

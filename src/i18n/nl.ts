@@ -92,6 +92,8 @@ export const nl = {
     view2d: 'Eenvoudige tafel (voor oudere of trage apparaten)',
   },
   loading3d: 'Tafel wordt gedekt...',
+  lookBack: 'Kijk naar tafel',
+  lookHint: 'Sleep om rond te kijken',
   rules: [
     {
       title: 'Het spel',

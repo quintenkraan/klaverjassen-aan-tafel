@@ -49,6 +49,24 @@ Overige commando's: `npm test`, `npm run lint`, `npm run build`, `npm run previe
 
 Andere hosting (Netlify, Vercel) kan ook: build-commando `npm run build`, map `dist`.
 
+## 3D: het café en de mensen
+
+- De 3D-tafel staat in een bruin café (bar, achterbar, spiegelwand, ramen, ingang met
+  houten schot), nagebouwd in code in `src/ui/three/Cafe.tsx`. Plattegrond: `src/ui/three/layout.ts`.
+- Jij zit op de bank met Sjaak naast je; Ria tegenover, Henk (je maat) schuin tegenover.
+- Slepen = rondkijken. "Kijk naar tafel" zet je blik terug. Kaarten klik je in je eigen handen.
+- In Instellingen kun je terug naar de eenvoudige tafel (voor oudere apparaten).
+
+De mensen en animaties komen van [Mixamo](https://www.mixamo.com) (Adobe), gratis te
+gebruiken in games. De ruwe FBX-bestanden staan niet in de repo (`assets-src/` is genegeerd);
+de omgezette, gecomprimeerde GLB's staan in `public/models/`. Omzetten deed ik zo:
+
+```bash
+FBX2glTF --binary --input persoon.fbx --output persoon      # npm-pakket fbx2gltf
+npx gltf-transform optimize persoon.glb public/models/persoon.glb \
+  --compress meshopt --texture-compress webp --texture-size 1024 --simplify false
+```
+
 ## Opbouw
 
 ```
