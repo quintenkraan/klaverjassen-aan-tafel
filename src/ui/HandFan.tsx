@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import { cardId, sameCard, type Card } from '../engine';
 import { nl } from '../i18n/nl';
 import { CardView } from './CardView';
+import { playerName } from './names';
 
 interface Props {
   cards: Card[];
@@ -28,7 +29,7 @@ export function HandFan({ cards, playable, active, onPlay }: Props) {
   const step = Math.min(7, 44 / Math.max(n - 1, 1));
 
   return (
-    <div className="fan" role="group" aria-label={nl.players[0]} onKeyDown={moveFocus}>
+    <div className="fan" role="group" aria-label={playerName(0)} onKeyDown={moveFocus}>
       <AnimatePresence initial={false}>
         {cards.map((card, i) => {
           const angle = (i - (n - 1) / 2) * step;

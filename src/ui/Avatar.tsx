@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import type { Gesture, Seat } from '../engine';
 import { nl } from '../i18n/nl';
 import { CardView } from './CardView';
+import { playerName } from './names';
 
 export interface Speech {
   seat: Seat;
@@ -49,7 +50,7 @@ export function Avatar({ seat, cards, thinking, dealer, speech, gesture, nod }: 
             key={speech.id}
             className="bubble"
             role="status"
-            aria-label={`${nl.players[seat]}: ${speech.text}`}
+            aria-label={`${playerName(seat)}: ${speech.text}`}
             initial={{ opacity: 0, y: 8, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0 }}
@@ -103,7 +104,7 @@ export function Avatar({ seat, cards, thinking, dealer, speech, gesture, nod }: 
         </text>
       </svg>
       <div className="avatar__name">
-        {nl.players[seat]}
+        {playerName(seat)}
         {dealer && ` (${nl.dealer})`}
       </div>
       <div className="avatar__cards">

@@ -129,6 +129,8 @@ export function sendSignal(
   gesture: Gesture,
   rng: Rng,
   attention: (seat: Seat) => number,
+  /** Stoelen met een mens: die moeten zelf opletten (geen kansberekening). */
+  humans: readonly Seat[] = [0],
 ): { state: SignalState; event: SignalEvent } {
   const team = teamOf(from);
   const to = partnerOf(from);
@@ -138,7 +140,7 @@ export function sendSignal(
   let seen: boolean | null = null;
   let understood: Meaning | null = null;
   const beliefs = [...s.beliefs];
-  if (to !== 0) {
+  if (!humans.includes(to)) {
     seen = rng() < info.visibility * (0.5 + 0.5 * attention(to));
     if (seen && intended) {
       const uses = team === 0 ? (s.usage[gesture] ?? 0) : 3;
@@ -159,8 +161,8 @@ export function sendSignal(
 
   let caughtBy: Seat | null = null;
   const known = team === 0 && s.known.includes(gesture);
-  for (const o of [1, 2, 3] as const) {
-    if (teamOf(o) === team) continue;
+  for (const o of [0, 1, 2, 3] as const) {
+    if (teamOf(o) === team || humans.includes(o)) continue;
     const p = Math.min(
       0.9,
       info.conspicuous * attention(o) * (1 + s.suspicion) * (known ? 1.6 : 1),

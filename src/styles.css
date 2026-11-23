@@ -352,6 +352,57 @@ body:has(.start) {
   overflow: auto;
 }
 
+/* Online */
+.setup input:not([type]),
+.setup input[type='text'] {
+  font: inherit;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgb(255 255 255 / 0.3);
+  background: rgb(0 0 0 / 0.25);
+  color: var(--ink);
+}
+.online__choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.online__choices section {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.online__choices h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.online__code {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 1.3rem !important;
+}
+.online__share {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.online__share input {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.online__bigcode {
+  font-size: 2rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+.online__seats {
+  line-height: 1.8;
+}
+
 /* Seinafspraak */
 .setup {
   min-height: 100vh;

@@ -10,6 +10,7 @@ import { fovFor, LOOK_AT, seatPose } from './layout';
 import { isLookingAway, lookBy, lookReset } from './look';
 import { preloadModels, useClips, type AnimKey, type PersonKey } from './models';
 import { Person } from './Person';
+import { playerName } from '../names';
 
 export interface Scene3DProps {
   trick: Trick | undefined;
@@ -242,7 +243,7 @@ export default function Scene3D(props: Scene3DProps) {
             )}
             {ahum && <div className="ahum3d">ahum</div>}
             <div className={`nametag ${props.thinking === seat ? 'nametag--turn' : ''}`}>
-              {nl.players[seat]}
+              {playerName(seat)}
               {props.dealer === seat && ` (${nl.dealer})`}
             </div>
           </div>

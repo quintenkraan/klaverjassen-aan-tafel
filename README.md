@@ -18,14 +18,14 @@ maar pas op: hij snapt het niet altijd, en de tegenstanders kijken mee.
 
 ## Spelen
 
-| Actie | Muis / touch | Toetsenbord |
-|---|---|---|
-| Kaart spelen | Klik, of sleep omhoog | `1`-`8`, of pijltjes + `Enter` |
-| Seinen | Knop "Seinen" linksonder | `S`, daarna `1`-`6` |
-| Tegenstanders betrappen | Knop "Ik zag dat!" | `Z` |
-| Laatste slag bekijken | Knop "Laatste slag" | `L` |
-| Geluid aan/uit | 🔊 | `M` |
-| Sluiten | | `Esc` |
+| Actie                   | Muis / touch             | Toetsenbord                    |
+| ----------------------- | ------------------------ | ------------------------------ |
+| Kaart spelen            | Klik, of sleep omhoog    | `1`-`8`, of pijltjes + `Enter` |
+| Seinen                  | Knop "Seinen" linksonder | `S`, daarna `1`-`6`            |
+| Tegenstanders betrappen | Knop "Ik zag dat!"       | `Z`                            |
+| Laatste slag bekijken   | Knop "Laatste slag"      | `L`                            |
+| Geluid aan/uit          | 🔊                       | `M`                            |
+| Sluiten                 |                          | `Esc`                          |
 
 De volledige spelregels staan in de game onder **Spelregels**, en technisch in [SPEC.md](SPEC.md).
 
@@ -48,6 +48,18 @@ Overige commando's: `npm test`, `npm run lint`, `npm run build`, `npm run previe
    `https://<gebruikersnaam>.github.io/<repo-naam>/`.
 
 Andere hosting (Netlify, Vercel) kan ook: build-commando `npm run build`, map `dist`.
+
+## Online spelen
+
+Op het startscherm: **Online spelen**. Eén persoon maakt een tafel en krijgt een code
+(bijvoorbeeld `XRNKB`) en een link (`...?tafel=XRNKB`). Anderen openen de link of typen de
+code. De eerste die meedoet wordt je maat; lege plekken spelen bots.
+
+Hoe het werkt: peer-to-peer via WebRTC ([PeerJS](https://peerjs.com)). De openbare
+PeerJS-server wordt alleen gebruikt om elkaar te vinden; daarna gaan zetten rechtstreeks
+tussen de browsers. De browser van de gastheer rekent het spel uit en stuurt iedere speler
+alleen wat die mag zien (`viewFor` in `src/engine/view.ts`). Geen eigen server of account nodig.
+Beperking: de gastheer moet zijn venster open houden.
 
 ## 3D: het café en de mensen
 

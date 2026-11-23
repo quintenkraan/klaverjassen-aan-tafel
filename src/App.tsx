@@ -13,16 +13,30 @@ import {
   type TableConfig,
 } from './ui/storage';
 import { TablePOV } from './ui/TablePOV';
+import { Online } from './ui/online/Online';
+
+/** Code uit een uitnodigingslink (?tafel=CODE). */
+function codeFromUrl(): string | undefined {
+  try {
+    return new URLSearchParams(window.location.search).get('tafel') ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 type Stage =
   | { kind: 'start' }
   | { kind: 'settings' }
   | { kind: 'rules' }
   | { kind: 'setup' }
+  | { kind: 'online'; code?: string }
   | { kind: 'play'; seed: number; config: TableConfig; initial?: GameState };
 
 export function App() {
-  const [stage, setStage] = useState<Stage>({ kind: 'start' });
+  const [stage, setStage] = useState<Stage>(() => {
+    const code = codeFromUrl();
+    return code ? { kind: 'online', code } : { kind: 'start' };
+  });
   const [settings, setSettings] = useState(loadSettings);
   const [saved, setSaved] = useState(loadGame);
   const toStart = () => {
@@ -63,6 +77,17 @@ export function App() {
       );
     case 'rules':
       return <RulesScreen onBack={toStart} />;
+    case 'online':
+      return (
+        <Online
+          config={configFrom(settings)}
+          initialCode={stage.code}
+          onExit={() => {
+            window.history.replaceState(null, '', window.location.pathname);
+            toStart();
+          }}
+        />
+      );
     case 'setup':
       return <SignalSetup initial={settings.agreement} onStart={startNew} onBack={toStart} />;
   }
@@ -96,6 +121,9 @@ export function App() {
         >
           {nl.newGame}
           {canResume && <small>{nl.newGameWarning}</small>}
+        </button>
+        <button type="button" onClick={() => setStage({ kind: 'online' })}>
+          {nl.playOnline}
         </button>
         <button type="button" className="ghost" onClick={() => setStage({ kind: 'settings' })}>
           {nl.settings}

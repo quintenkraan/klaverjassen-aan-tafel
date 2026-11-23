@@ -11,9 +11,10 @@ import { GameOverOverlay, LastTrickPopup, RoundOverlay, ScoreSheet, SignalLog } 
 import { sound } from './sound';
 import type { TableConfig } from './storage';
 import { TrickArea } from './TrickArea';
-import { useGame } from './useGame';
+import { useGame, type GameController } from './useGame';
 import { useTalk } from './useTalk';
 import type { GameState } from '../engine';
+import { playerName } from './names';
 
 interface Props {
   seed: number;
@@ -23,10 +24,28 @@ interface Props {
   onExit: () => void;
 }
 
-/** First-person tafel: jij onderin, maat tegenover, tegenstanders links en rechts. */
+/** Alleen spelen tegen bots. */
 export function TablePOV({ seed, config, initial, onExit }: Props) {
-  const { agreement, showLog } = config;
   const g = useGame(seed, config, initial);
+  return <TableView g={g} seed={seed} config={config} onExit={onExit} />;
+}
+
+/**
+ * First-person tafel: jij onderin, maat tegenover, tegenstanders links en rechts.
+ * Werkt op elke GameController: alleen spelen, online host of online gast.
+ */
+export function TableView({
+  g,
+  seed,
+  config,
+  onExit,
+}: {
+  g: GameController;
+  seed: number;
+  config: TableConfig;
+  onExit: () => void;
+}) {
+  const { agreement, showLog } = config;
   const { game, pause, over, play, pass, choose, nextRound, newGame, gesture, nod, line } = g;
   const talk = useTalk(game, seed);
   const speech = line && (!talk || line.id > talk.id) ? line : talk;
@@ -57,7 +76,7 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
   const hand = sortHand(round.hands[0]!, round.trump);
   const use3d = (config.view ?? '3d') === '3d' && webglAvailable();
   const tableLabel = shownTrick?.cards.length
-    ? `${nl.onTable}: ${shownTrick.cards.map((pc) => `${nl.players[pc.seat]} ${nl.cardName(pc.card)}`).join(', ')}`
+    ? `${nl.onTable}: ${shownTrick.cards.map((pc) => `${playerName(pc.seat)} ${nl.cardName(pc.card)}`).join(', ')}`
     : nl.emptyTable;
   const signalsOn = rules.signals.enabled && round.phase === 'spelen';
   const toggleMute = () => {
@@ -96,9 +115,9 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   });
 
-  let status: string = nl.waitingFor(nl.players[round.turn]);
+  let status: string = nl.waitingFor(playerName(round.turn));
   if (myTurn) status = bid ? nl.chooseTrump : nl.dragHint;
-  if (pause && lastTrick) status = nl.wonBy(nl.players[lastTrick.winner]);
+  if (pause && lastTrick) status = nl.wonBy(playerName(lastTrick.winner));
   else if (round.phase === 'klaar') status = nl.roundOver;
 
   return (
@@ -112,7 +131,7 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
             {round.trump ? (
               <>
                 {nl.trump}: <strong>{nl.suits[round.trump]}</strong> ({nl.plays}:{' '}
-                {nl.players[round.trumpChooser!]})
+                {playerName(round.trumpChooser!)})
               </>
             ) : round.proposedSuit ? (
               nl.proposed(nl.suits[round.proposedSuit])
@@ -197,7 +216,7 @@ export function TablePOV({ seed, config, initial, onExit }: Props) {
             nl.youDid(nl.gestures[gesture.gesture])
           ) : (
             <>
-              {nl.players[0]}
+              {playerName(0)}
               {round.dealer === 0 && ` (${nl.dealer})`}
             </>
           )}

@@ -9,6 +9,7 @@ import {
 } from '../engine';
 import { nl } from '../i18n/nl';
 import { CardView } from './CardView';
+import { playerName } from './names';
 
 export function ScoreSheet({ game, children }: { game: GameState; children?: ReactNode }) {
   const sum = totals(game);
@@ -132,7 +133,7 @@ export function SignalLog({ game }: { game: GameState }) {
       <ul>
         {events.map((e) => (
           <li key={e.id}>
-            {nl.players[e.from]}: {nl.gestures[e.gesture].toLowerCase()}
+            {playerName(e.from)}: {nl.gestures[e.gesture].toLowerCase()}
             {e.from === 2 && e.intended && ` (${nl.meaning(e.intended).toLowerCase()})`}
           </li>
         ))}
@@ -149,12 +150,12 @@ export function LastTrickPopup({ trick, onClose }: { trick: CompletedTrick; onCl
         {trick.cards.map((pc) => (
           <div key={pc.seat} className="lasttrick__card">
             <CardView card={pc.card} />
-            <span>{nl.players[pc.seat]}</span>
+            <span>{playerName(pc.seat)}</span>
           </div>
         ))}
       </div>
       <p>
-        {nl.wonBy(nl.players[trick.winner])} ({trick.points}
+        {nl.wonBy(playerName(trick.winner))} ({trick.points}
         {trick.roem > 0 && ` + ${trick.roem} ${nl.roem.toLowerCase()}`})
       </p>
       <button type="button" onClick={onClose} autoFocus>

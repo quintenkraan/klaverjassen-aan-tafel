@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { cardId, type Card, type Seat, type Trick } from '../engine';
 import { nl } from '../i18n/nl';
 import { CardView } from './CardView';
+import { playerName } from './names';
 
 /** Waar een kaart vandaan komt (en naartoe gaat als die speler de slag pakt). */
 const EDGE: Record<Seat, { x: number; y: number }> = {
@@ -31,7 +32,7 @@ export function TrickArea({ trick, winner }: { trick: Trick | undefined; winner:
       role="region"
       aria-label={
         trick?.cards.length
-          ? `${nl.onTable}: ${trick.cards.map((pc) => `${nl.players[pc.seat]} ${nl.cardName(pc.card)}`).join(', ')}`
+          ? `${nl.onTable}: ${trick.cards.map((pc) => `${playerName(pc.seat)} ${nl.cardName(pc.card)}`).join(', ')}`
           : nl.emptyTable
       }
     >
