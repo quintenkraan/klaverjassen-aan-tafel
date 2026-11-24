@@ -9,6 +9,7 @@ import { TrickCards } from './Cards3D';
 import { fovFor, LOOK_AT, seatPose } from './layout';
 import { isLookingAway, lookBy, lookReset } from './look';
 import { preloadModels, useClips, type AnimKey, type PersonKey } from './models';
+import { Patrons } from './Patrons';
 import { Person } from './Person';
 import { playerName } from '../names';
 
@@ -136,6 +137,7 @@ function People(props: Scene3DProps & { reduced: boolean }) {
 
   return (
     <>
+      <Patrons clips={clips} />
       <Person
         who="henk"
         seat={0}

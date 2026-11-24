@@ -27,6 +27,19 @@ const animUrl = (k: AnimKey) => `${base}anim-${k}.glb`;
 
 const LOWER = /^(Hips|LeftUpLeg|LeftLeg|LeftFoot|LeftToe|RightUpLeg|RightLeg|RightFoot|RightToe)/;
 const HEAD = /^(Neck|Head|LeftEye|RightEye)/;
+const FINGER = /^(Left|Right)Hand(Thumb|Index|Middle|Ring|Pinky)/;
+
+/** Vingers stil in de eerste stand: anders lijkt kaarten vasthouden op typen op een telefoon. */
+function freezeFingers(clip: AnimationClip): AnimationClip {
+  for (const t of clip.tracks) {
+    if (!FINGER.test(boneOf(t.name))) continue;
+    const n = t.getValueSize();
+    const first = Array.from(t.values.slice(0, n));
+    t.times = new Float32Array([0]);
+    t.values = new Float32Array(first);
+  }
+  return clip;
+}
 
 /** Elk Mixamo-bestand heeft een eigen voorvoegsel (mixamorig, mixamorig8, ...). Weg ermee. */
 const PREFIX = /^mixamorig\d*:?/;
@@ -81,6 +94,7 @@ export function useClips(): ClipSet {
       const clip = gltfs[i]!.animations[0]!;
       const rot = (prop: string) => prop === 'quaternion';
       body[key] = part(clip, `body-${key}`, (b, p) => rot(p) && !LOWER.test(b) && !HEAD.test(b));
+      if (key === 'hold') freezeFingers(body[key]);
       head[key] = part(clip, `head-${key}`, (b, p) => rot(p) && HEAD.test(b));
       if (key === 'idle') {
         lower = part(

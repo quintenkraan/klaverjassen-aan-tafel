@@ -156,7 +156,8 @@ export function Person({
         [armR, foreR, right, 1],
         [armL, foreL, left, -1],
       ] as const) {
-        const target = tmp.target.copy(chest).addScaledVector(side, 0.055 * s);
+        // Jij houdt de waaier breder vast (links onder, rechts ernaast), anders lijkt het een telefoon.
+        const target = tmp.target.copy(chest).addScaledVector(side, (isPlayer ? 0.085 : 0.055) * s);
         arm.getWorldPosition(tmp.pole);
         tmp.pole.addScaledVector(side, 0.35 * s).addScaledVector(fwd, -0.1).y -= 0.5;
         twoBoneIK(arm, fore, hand, target, tmp.pole);
@@ -171,14 +172,14 @@ export function Person({
     const g = gesture && gp < 1 ? gesture : null;
     const env = g ? Math.sin(Math.PI * gp) : 0;
 
-    // Kaarten in de hand: tussen beide handen, naar het eigen gezicht gericht.
-    if (held.current && bones.left && bones.right && bones.head) {
+    // Kaarten in de hand: tussen beide handen, rechtop, voorkant naar de eigen ogen (iets
+    // achterover). Vaste draaiing per stoel, zodat de waaier nooit kantelt of op de kop staat.
+    if (held.current && bones.left && bones.right) {
       bones.left.getWorldPosition(a);
       bones.right.getWorldPosition(b);
       a.lerp(b, 0.5);
       held.current.position.copy(a);
-      bones.head.getWorldPosition(b);
-      held.current.lookAt(b);
+      held.current.rotation.set(-0.45, rotationY + Math.PI, 0, 'YXZ');
     }
 
     // Ooglid en wenkbrauwen voor knipoog en wenkbrauw-sein.
@@ -227,7 +228,10 @@ export function Person({
       bones.left.getWorldPosition(a);
       bones.right.getWorldPosition(b);
       a.lerp(b, 0.5);
-      a.y += 0.05;
+      a.y += 0.06;
+      // Iets vóór je handen: je vingers zitten achter de waaier en steken er niet doorheen.
+      tmp.target.subVectors(a, camera.position).normalize();
+      a.addScaledVector(tmp.target, -0.04);
       mine.current.position.copy(a);
       mine.current.lookAt(camera.position);
     }

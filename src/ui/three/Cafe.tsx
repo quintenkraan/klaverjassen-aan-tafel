@@ -559,9 +559,62 @@ function Bar({ t }: { t: ReturnType<typeof useTextures> }) {
 }
 
 /** Voorgevel: ramen naar de straat, twee deuren, elk met een houten schot erachter. */
+/** Panelen met verticale latten, onderaan een portaalwand. */
+function PanelWall({ w, rot = 0, p }: { w: number; rot?: number; p: [number, number, number] }) {
+  const n = Math.max(2, Math.round(w / 0.16));
+  return (
+    <group position={p} rotation-y={rot}>
+      <Box p={[0, 0.85, 0]} s={[w, 1.7, 0.06]} c="#1e130b" r={0.5} />
+      {Array.from({ length: n }, (_, i) => (
+        <Box
+          key={i}
+          p={[-w / 2 + (w / n) * (i + 0.5), 0.85, 0.035]}
+          s={[w / n - 0.03, 1.5, 0.012]}
+          c="#2b1a0f"
+          r={0.45}
+        />
+      ))}
+      {/* Glas bovenin met stijlen, daarboven een kroonlijst */}
+      <mesh position={[0, 2.08, 0]}>
+        <boxGeometry args={[w - 0.06, 0.72, 0.02]} />
+        <meshStandardMaterial color="#2a2a24" transparent opacity={0.35} roughness={0.05} />
+      </mesh>
+      {[-w / 2, -w / 6, w / 6, w / 2].map((dx) => (
+        <Box key={dx} p={[dx, 2.08, 0]} s={[0.05, 0.76, 0.07]} c="#1e130b" />
+      ))}
+      <Box p={[0, 1.72, 0]} s={[w, 0.05, 0.08]} c="#1e130b" />
+      <Box p={[0, 2.5, 0]} s={[w + 0.08, 0.1, 0.12]} c={WOOD_DARK} />
+    </group>
+  );
+}
+
+/**
+ * Tochtportaal achter de voordeur: donkere houten wanden met glas bovenin. De voorkant is
+ * dicht (je loopt er tegenaan), één zijkant open; daar ligt de rode mat.
+ */
+function Portal({ x, z, open }: { x: number; z: number; open: 1 | -1 }) {
+  const w = 1.5;
+  const d = 1.2;
+  const inner = z - d;
+  return (
+    <group>
+      <PanelWall p={[x, 0, inner]} w={w} rot={Math.PI} />
+      <PanelWall p={[x - (open * w) / 2, 0, z - d / 2]} w={d} rot={(-open * Math.PI) / 2} />
+      {/* Open kant: alleen een bovenlicht met glas en een balk */}
+      <Box p={[x + (open * w) / 2, 2.5, z - d / 2]} s={[0.12, 0.1, d]} c={WOOD_DARK} />
+      <Box p={[x + (open * w) / 2, 2.25, z - d / 2]} s={[0.04, 0.4, d]} c="#1e130b" />
+      <Box p={[x + (open * w) / 2, 1.25, inner + 0.03]} s={[0.08, 2.5, 0.08]} c={WOOD_DARK} />
+      {/* Plafondje van het portaal en de rode mat */}
+      <Box p={[x, 2.56, z - d / 2]} s={[w + 0.1, 0.03, d + 0.05]} c="#160e08" />
+      <Box p={[x + open * 0.3, 0.006, z - d / 2]} s={[w + 0.4, 0.01, d - 0.2]} c="#7d1a16" r={1} />
+      <pointLight position={[x, 2.3, z - d / 2]} intensity={0.25} distance={2} color="#ffb060" />
+    </group>
+  );
+}
+
 function Front({ t }: { t: ReturnType<typeof useTextures> }) {
   const z = maxZ;
-  const doors = [-2.0, 3.3];
+  const doors = [-2.0, 3.15];
   return (
     <group>
       <mesh position={[0, H / 2, z]} rotation-y={Math.PI}>
@@ -586,12 +639,8 @@ function Front({ t }: { t: ReturnType<typeof useTextures> }) {
             <meshStandardMaterial color="#1a2438" emissive="#31456e" emissiveIntensity={0.4} />
           </mesh>
           <Box p={[x + 0.35, 1.05, z - 0.12]} s={[0.04, 0.2, 0.04]} c={BRASS} m={0.9} r={0.3} />
-          {/* Houten schot net binnen: je moet links of rechts eromheen */}
-          <Box p={[x, 1.0, z - 1.15]} s={[1.6, 2.0, 0.08]} c="#2a1a10" r={0.55} />
-          <Box p={[x, 2.03, z - 1.15]} s={[1.7, 0.06, 0.14]} c={WOOD} />
-          {[-0.4, 0.4].map((dx) => (
-            <Box key={dx} p={[x + dx, 1.05, z - 1.1]} s={[0.66, 1.6, 0.02]} c="#3a2416" />
-          ))}
+          {/* Houten portaal net binnen (zoals op de foto): je loopt er links of rechts uit */}
+          <Portal x={x} z={z} open={x < 0 ? 1 : -1} />
         </group>
       ))}
     </group>
