@@ -11,6 +11,9 @@ export const TABLE_TOP = 0.76;
 export const BAR = { x: -1.2, depth: 0.7, z0: -5.2, z1: 5.0, top: 1.1 };
 /** Tafeltjes langs de ramenkant. */
 export const WALL_TABLE_X = ROOM.minX + 0.55;
+/** WC-deur, net voorbij het eind van de bar (linkerkant), en de hoofddeur in de voorgevel. */
+export const WC_DOOR_X = 2.83;
+export const FRONT_DOOR_X = 2.7;
 /** Speeltafel: rechthoekig, voor de bank. */
 export const TABLE = { x: -2.9, z: -7.98, w: 1.0, d: 0.84 };
 export const BENCH_Z = -8.64;

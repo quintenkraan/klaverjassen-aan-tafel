@@ -151,7 +151,62 @@ export function lowerFor(lower: AnimationClip, hipsRatio: number): AnimationClip
   return clip;
 }
 
+/** Hele-lijf-clips om rond te lopen: gaan zitten (achterstevoren = opstaan) en lopen. */
+const MOVES = ['sitdown', 'walk'] as const;
+export interface MoveClips {
+  sit: AnimationClip;
+  walk: AnimationClip;
+}
+
+export function useMoveClips(): MoveClips {
+  const gltfs = useGLTF(
+    MOVES.map((k) => `${base}anim-${k}.glb`),
+    false,
+    true,
+  );
+  return useMemo(() => {
+    const [sit, walk] = gltfs.map((g, i) =>
+      part(
+        g.animations[0]!,
+        MOVES[i]!,
+        (b, p) => p === 'quaternion' || (b === 'Hips' && p === 'position'),
+      ),
+    );
+    return { sit: sit!, walk: walk! };
+  }, [gltfs]);
+}
+
+/**
+ * Hele-lijf-clips omgerekend naar dit skelet. Lopen: alleen op en neer (wij verplaatsen de
+ * persoon zelf). Zitten: eindigt precies in de zithouding, en komt maar `forward` meter naar
+ * voren (anders stap je bij een tafeltje door het tafelblad).
+ */
+export function movesFor(m: MoveClips, hipsRatio: number, forward: number): MoveClips {
+  const fix = (clip: AnimationClip, walk: boolean) => {
+    const out = clip.clone();
+    for (const t of out.tracks) {
+      if (t.name !== 'Hips.position') continue;
+      const v = Array.from(t.values);
+      const n = v.length / 3;
+      const lastX = v[(n - 1) * 3]!;
+      const lastZ = v[(n - 1) * 3 + 2]!;
+      const travel = Math.abs(v[2]! - lastZ) || 1;
+      for (let i = 0; i < n; i++) {
+        v[i * 3] = walk ? 0 : v[i * 3]! - lastX;
+        v[i * 3 + 2] = walk ? 0 : ((v[i * 3 + 2]! - lastZ) * forward) / travel;
+        v[i * 3]! *= hipsRatio;
+        v[i * 3 + 1]! *= hipsRatio;
+        v[i * 3 + 2]! *= hipsRatio;
+      }
+      t.values = Float32Array.from(v) as typeof t.values;
+    }
+    return out;
+  };
+  return { sit: fix(m.sit, false), walk: fix(m.walk, true) };
+}
+
 export function preloadModels() {
   Object.values(PEOPLE).forEach((u) => useGLTF.preload(u, false, true));
   ANIMS.forEach((k) => useGLTF.preload(animUrl(k), false, true));
+  MOVES.forEach((k) => useGLTF.preload(`${base}anim-${k}.glb`, false, true));
 }

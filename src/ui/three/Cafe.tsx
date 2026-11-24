@@ -2,7 +2,16 @@ import { Instance, Instances } from '@react-three/drei';
 import { useEffect, useMemo, useState } from 'react';
 import { CanvasTexture, RepeatWrapping, SRGBColorSpace, TextureLoader, type Texture } from 'three';
 import { createRng } from '../../engine';
-import { BAR, BENCH_Z, ROOM, TABLE, TABLE_TOP, WALL_TABLE_X } from './layout';
+import {
+  BAR,
+  BENCH_Z,
+  FRONT_DOOR_X,
+  ROOM,
+  TABLE,
+  TABLE_TOP,
+  WALL_TABLE_X,
+  WC_DOOR_X,
+} from './layout';
 
 /**
  * Het bruine café, naar jouw foto's (zie de plattegrond in layout.ts):
@@ -727,7 +736,7 @@ function Front({ t }: { t: ReturnType<typeof useTextures> }) {
       </mesh>
       <pointLight position={[0.65, 2.7, z - 0.5]} intensity={0.6} distance={3} color="#ff3a2a" />
       {/* Hoofdingang: helemaal links in de voorgevel (vanaf jouw plek gezien) */}
-      <Door p={[2.7, 0, z]} rotY={Math.PI} />
+      <Door p={[FRONT_DOOR_X, 0, z]} rotY={Math.PI} />
     </group>
   );
 }
@@ -753,7 +762,7 @@ function BehindBar({ t }: { t: ReturnType<typeof useTextures> }) {
       {[BAR.z0, BAR.z1].map((z) => (
         <Box key={z} p={[cx, H / 2, z]} s={[w, H, 0.12]} c="#2a1c12" r={0.9} />
       ))}
-      <Door p={[cx + 0.3, 0, BAR.z1 + 0.06]} rotY={0} sign={t.wc} />
+      <Door p={[WC_DOOR_X, 0, BAR.z1 + 0.06]} rotY={0} sign={t.wc} />
     </group>
   );
 }

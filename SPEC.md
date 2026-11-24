@@ -94,4 +94,7 @@ bewaren per zet), SettingsScreen.tsx, RulesScreen.tsx, App.tsx (start, hervatten
       Bots: bidEstimate in ai/smart.ts. UI: src/ui/BidPanel.tsx. Tests: src/engine/bidding.test.ts.
 - [x] Café v4: bar naar de ramenkant met smal gangpad, zijdeur met hutje halverwege de ramenmuur,
       hoofddeur en WC linksvoor, drie gelijke tafels langs de spiegelbank, portret, cafégasten.
+- [x] Levend café: af en toe staat een gast op en loopt via het gangpad naar de WC, de hoofddeur
+      of de zijdeur, blijft even weg en gaat weer zitten (één tegelijk). Routes: src/ui/three/walks.ts,
+      gedrag: Patrons.tsx (useWanderer), animaties Stand To Sit (achterstevoren = opstaan) en Walking.
 - [ ] Statistieken. Zie VOORSTEL-MORGEN.md voor de volgende stappen.

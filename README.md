@@ -68,6 +68,7 @@ Beperking: de gastheer moet zijn venster open houden.
   houten schot), nagebouwd in code in `src/ui/three/Cafe.tsx`. Plattegrond: `src/ui/three/layout.ts`.
 - Jij zit op de bank met Sjaak naast je; Ria tegenover, Henk (je maat) schuin tegenover.
 - Slepen = rondkijken. "Kijk naar tafel" zet je blik terug. Kaarten klik je in je eigen handen.
+- Andere gasten drinken een biertje, praten, en staan af en toe op om naar de WC of naar buiten te lopen.
 - In Instellingen kun je terug naar de eenvoudige tafel (voor oudere apparaten).
 
 De mensen en animaties komen van [Mixamo](https://www.mixamo.com) (Adobe), gratis te
