@@ -37,6 +37,7 @@ export function useGuestGame(
     play: (card) => act({ kind: 'play', card }),
     pass: () => act({ kind: 'pass' }),
     choose: (suit) => act({ kind: 'trump', suit }),
+    bid: (value, trump) => act({ kind: 'bid', value, trump }),
     signal: (gesture) => act({ kind: 'signal', gesture }),
     accuse: () => act({ kind: 'accuse' }),
     nextRound: () => act({ kind: 'next' }),

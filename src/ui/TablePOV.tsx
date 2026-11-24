@@ -5,6 +5,7 @@ import { webglAvailable } from './three/support';
 const Scene3D = lazy(() => import('./three/Scene3D'));
 import { bidOptions, GESTURES, playableCards, sameCard, sortHand } from '../engine';
 import { nl } from '../i18n/nl';
+import { BidPanel } from './BidPanel';
 import { Avatar } from './Avatar';
 import { HandFan } from './HandFan';
 import { GameOverOverlay, LastTrickPopup, RoundOverlay, ScoreSheet, SignalLog } from './Panels';
@@ -116,9 +117,11 @@ export function TableView({
   });
 
   let status: string = nl.waitingFor(playerName(round.turn));
-  if (myTurn) status = bid ? nl.chooseTrump : nl.dragHint;
+  const auction = rules.trumpMode === 'bieden';
+  if (myTurn) status = bid ? (auction ? nl.bidding.title : nl.chooseTrump) : nl.dragHint;
   if (pause && lastTrick) status = nl.wonBy(playerName(lastTrick.winner));
-  else if (round.phase === 'klaar') status = nl.roundOver;
+  else if (round.phase === 'klaar')
+    status = round.playingTeam === null ? nl.bidding.passedOut : nl.roundOver;
 
   return (
     <div className="layout">
@@ -131,10 +134,21 @@ export function TableView({
             {round.trump ? (
               <>
                 {nl.trump}: <strong>{nl.suits[round.trump]}</strong> ({nl.plays}:{' '}
-                {playerName(round.trumpChooser!)})
+                {playerName(round.trumpChooser!)}
+                {round.contract && `, ${nl.bidding.value(round.contract.value)}`})
               </>
             ) : round.proposedSuit ? (
               nl.proposed(nl.suits[round.proposedSuit])
+            ) : auction ? (
+              round.contract ? (
+                nl.bidding.highest(
+                  nl.bidding.value(round.contract.value),
+                  nl.suits[round.contract.trump],
+                  playerName(round.contract.seat),
+                )
+              ) : (
+                nl.bidding.title
+              )
             ) : (
               nl.chooseTrump
             )}
@@ -194,7 +208,8 @@ export function TableView({
 
         {!use3d && <TrickArea trick={shownTrick} winner={lastTrick?.winner ?? null} />}
 
-        {bid && (
+        {bid && auction && <BidPanel round={round} rules={rules} onBid={g.bid} onPass={pass} />}
+        {bid && !auction && (
           <div className="bid">
             {bid.suits.map((s, i) => (
               <button key={s} type="button" autoFocus={i === 0} onClick={() => choose(s)}>
@@ -267,7 +282,9 @@ export function TableView({
         {over ? (
           <GameOverOverlay game={game} onAgain={newGame} />
         ) : (
-          round.phase === 'klaar' && !pause && <RoundOverlay game={game} onNext={nextRound} />
+          round.phase === 'klaar' &&
+          round.playingTeam !== null &&
+          !pause && <RoundOverlay game={game} onNext={nextRound} />
         )}
       </div>
       <ScoreSheet game={game}>

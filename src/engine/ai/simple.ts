@@ -1,4 +1,4 @@
-import { bidOptions, chooseTrump, passBid, playableCards, playCard } from '../round';
+import { bidOptions, chooseTrump, passBid, placeBid, playableCards, playCard } from '../round';
 import type { Rng } from '../rng';
 import type { RoundState, Rules, Suit } from '../types';
 
@@ -13,6 +13,15 @@ export function simpleBotStep(round: RoundState, rules: Rules, rng: Rng): RoundS
     const opts = bidOptions(round, rules);
     const hand = round.hands[seat]!;
     const count = (s: Suit) => hand.filter((c) => c.suit === s).length;
+    if (opts.minBid) {
+      const suit = (['klaveren', 'ruiten', 'harten', 'schoppen'] as Suit[]).sort(
+        (a, b) => count(b) - count(a),
+      )[0]!;
+      const min = opts.minBid[suit];
+      if (!round.lastChance && min !== null && min <= 90 && count(suit) >= 4)
+        return placeBid(round, rules, seat, min, suit);
+      return passBid(round, rules, seat);
+    }
     const best = [...opts.suits].sort((a, b) => count(b) - count(a))[0];
     if (!best || (opts.canPass && count(best) < 3 && rng() < 0.8))
       return passBid(round, rules, seat);

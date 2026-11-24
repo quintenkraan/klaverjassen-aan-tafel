@@ -55,6 +55,13 @@ function roundView(r: RoundState, me: Seat, reveal: boolean): RoundState {
     turn: toView(r.turn, me),
     trumpChooser: r.trumpChooser === null ? null : toView(r.trumpChooser, me),
     playingTeam: r.playingTeam === null ? null : teamView(r.playingTeam, me),
+    ...(r.bids && {
+      bids: r.bids.map((b) => ({
+        seat: toView(b.seat, me),
+        bid: b.bid && { ...b.bid, seat: toView(b.bid.seat, me) },
+      })),
+    }),
+    ...(r.contract && { contract: { ...r.contract, seat: toView(r.contract.seat, me) } }),
     currentTrick: trickView(r.currentTrick, me),
     tricks: r.tricks.map((t) => ({
       ...trickView<CompletedTrick>(t, me),
@@ -73,6 +80,7 @@ function scoreView(s: RoundScore, me: Seat): RoundScore {
     pit: s.pit === null ? null : teamView(s.pit, me),
     ...(s.forfeit !== undefined && { forfeit: teamView(s.forfeit, me) }),
     ...(s.penalty !== undefined && { penalty: pairView(s.penalty, me) }),
+    ...(s.contract && { contract: { ...s.contract, seat: toView(s.contract.seat, me) } }),
   };
 }
 

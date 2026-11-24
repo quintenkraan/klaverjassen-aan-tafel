@@ -1,9 +1,17 @@
 import { cardPoints, partnerOf, strength, teamOf } from '../cards';
 import type { Rng } from '../rng';
 import { roemOf } from '../roem';
-import { bidOptions, chooseTrump, passBid, playableCards, playCard } from '../round';
+import {
+  bidOptions,
+  chooseTrump,
+  passBid,
+  placeBid,
+  playableCards,
+  playCard,
+  TRUMPS,
+} from '../round';
 import { trickWinner } from '../rules';
-import type { Card, Meaning, Rank, RoundState, Rules, Seat, Suit, Trick } from '../types';
+import type { Card, Meaning, Rank, RoundState, Rules, Seat, Suit, Trick, Trump } from '../types';
 import { buildKnowledge, isBoss, type Knowledge } from './knowledge';
 import {
   DIFFICULTY,
@@ -37,7 +45,53 @@ export function handStrength(hand: Card[], trump: Suit): number {
   return v;
 }
 
+/**
+ * Wat een bot denkt te halen met deze troef, volgens de tips uit jullie spelregels:
+ * Boer of Nel: 80, Boer en Nel: 90, elke Aas 10 erbij. Sans vanaf drie Azen.
+ * null = hier niet op bieden.
+ */
+export function bidEstimate(hand: Card[], trump: Trump): number | null {
+  const aces = hand.filter((c) => c.rank === 'A').length;
+  if (trump === 'sans') {
+    if (aces < 3) return null;
+    const tens = hand.filter(
+      (c) => c.rank === '10' && hand.some((h) => h.suit === c.suit && h.rank === 'A'),
+    ).length;
+    return Math.min(130, 70 + 10 * (aces - 3) + 10 * tens);
+  }
+  const has = (r: Rank) => hand.some((c) => c.suit === trump && c.rank === r);
+  if (!has('B') && !has('9')) return null;
+  const length = hand.filter((c) => c.suit === trump).length;
+  let v = has('B') && has('9') ? 90 : 80;
+  v += 10 * aces;
+  if (length >= 4) v += 10;
+  if (length <= 2) v -= 10;
+  return Math.min(160, v);
+}
+
+function auctionBid(round: RoundState, rules: Rules, rng: Rng, p: BotProfile): RoundState {
+  const seat = round.turn;
+  const opts = bidOptions(round, rules);
+  // Laatste kans na drie keer passen: verhogen levert niks op, dus laten staan.
+  if (round.lastChance) return passBid(round, rules, seat);
+  const hand = round.hands[seat]!;
+  const mood = (p.personality.aggression - 0.55) * 25;
+  const noise = p.difficulty === 'makkelijk' ? (rng() - 0.5) * 20 : 0;
+  const partnerHolds = round.contract && teamOf(round.contract.seat) === teamOf(seat);
+  let best: { trump: Trump; value: number; slack: number } | null = null;
+  for (const trump of TRUMPS) {
+    const est = bidEstimate(hand, trump);
+    const min = opts.minBid?.[trump] ?? null;
+    if (est === null || min === null) continue;
+    const slack = est + mood + noise - min - (partnerHolds ? 15 : 0);
+    if (slack >= 0 && (!best || slack > best.slack)) best = { trump, value: min, slack };
+  }
+  if (!best) return passBid(round, rules, seat);
+  return placeBid(round, rules, seat, best.value, best.trump);
+}
+
 function chooseBid(round: RoundState, rules: Rules, rng: Rng, p: BotProfile): RoundState {
+  if (rules.trumpMode === 'bieden') return auctionBid(round, rules, rng, p);
   const seat = round.turn;
   const opts = bidOptions(round, rules);
   const hand = round.hands[seat]!;
@@ -56,7 +110,7 @@ function chooseBid(round: RoundState, rules: Rules, rng: Rng, p: BotProfile): Ro
 
 interface Ctx {
   seat: Seat;
-  trump: Suit;
+  trump: Trump;
   trick: Trick;
   k: Knowledge;
   p: BotProfile;
@@ -65,9 +119,9 @@ interface Ctx {
   hint: Meaning | null;
 }
 
-const pts = (c: Card, trump: Suit) => cardPoints(c, trump);
+const pts = (c: Card, trump: Trump) => cardPoints(c, trump);
 /** Hoe "duur" het is om een kaart weg te geven: punten, en troef houden we liever. */
-const cost = (c: Card, trump: Suit) =>
+const cost = (c: Card, trump: Trump) =>
   pts(c, trump) + (c.suit === trump ? 6 + strength(c, trump) : strength(c, trump) * 0.1);
 
 const withCard = (ctx: Ctx, card: Card): Trick => ({
@@ -97,7 +151,7 @@ function lead(legal: Card[], ctx: Ctx): Card {
   const opps = opponentsOf(seat);
   const trumps = legal.filter((c) => c.suit === trump);
   const oppsMayTrump =
-    k.unseen.some((u) => u.suit === trump) && opps.some((o) => !k.voids[o]!.has(trump));
+    k.unseen.some((u) => u.suit === trump) && opps.some((o) => !k.voids[o]!.has(trump as Suit));
 
   // Spelende partij: troef trekken met de hoogste troef als die baas is.
   if (ctx.weArePlaying && trumps.length > 0 && oppsMayTrump) {

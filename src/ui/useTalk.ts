@@ -14,8 +14,16 @@ function lineFor(game: GameState, rng: () => number): Line | null {
     return options[Math.floor(rng() * options.length)]!;
   };
 
+  if (r.phase === 'bieden' || (r.phase === 'klaar' && r.playingTeam === null)) {
+    const turn = r.bids?.at(-1);
+    if (!turn || turn.seat === 0) return null;
+    if (!turn.bid) return { seat: turn.seat, lines: nl.bidding.pass };
+    const say = nl.bidding.say(nl.bidding.value(turn.bid.value), nl.suits[turn.bid.trump]);
+    return { seat: turn.seat, lines: [say] };
+  }
+
   if (r.phase === 'klaar' && r.playingTeam !== null) {
-    const s = scoreRound(r.tricks, r.playingTeam);
+    const s = scoreRound(r.tricks, r.playingTeam, r.contract);
     if (s.pit !== null) return { seat: s.pit === 0 ? 2 : pickBot(1), lines: nl.talk.pit };
     if (s.nat) {
       return r.playingTeam === 0
@@ -50,7 +58,7 @@ export function useTalk(game: GameState, seed: number): Speech | null {
   const rng = useRef(createRng(seed ^ 0x7a1c));
   const lastKey = useRef('');
   const r = game.round;
-  const key = `${game.roundIndex}:${r.phase}:${r.trump}:${r.tricks.length}:${r.currentTrick.cards.length === 0}`;
+  const key = `${game.roundIndex}:${r.phase}:${r.trump}:${r.bids?.length ?? 0}:${r.tricks.length}:${r.currentTrick.cards.length === 0}`;
 
   useEffect(() => {
     if (key === lastKey.current) return;

@@ -1,4 +1,4 @@
-import type { Card, Gesture, Meaning, Rank, Suit } from '../engine';
+import type { Card, Gesture, Meaning, Rank, Trump } from '../engine';
 
 const RANK_NAMES: Record<Rank, string> = {
   '7': 'zeven',
@@ -22,7 +22,8 @@ export const nl = {
     ruiten: 'Ruiten',
     harten: 'Harten',
     schoppen: 'Schoppen',
-  } as Record<Suit, string>,
+    sans: 'Sans',
+  } as Record<Trump, string>,
   cardName: (card: Card) => `${card.suit} ${RANK_NAMES[card.rank]}`,
   onTable: 'Op tafel',
   emptyTable: 'Nog niets op tafel',
@@ -37,6 +38,22 @@ export const nl = {
   chooseTrump: 'Kies troef',
   proposed: (suit: string) => `Voorgesteld: ${suit}`,
   pass: 'Passen',
+  onSheet: 'Op het blok',
+  bidding: {
+    title: 'Bieden',
+    highest: (value: string, trump: string, who: string) =>
+      `Hoogste bod: ${value} ${trump} (${who})`,
+    none: 'Nog geen bod. Minimaal 80 op een kleur, of 70 sans.',
+    lastChance: 'Iedereen past. Verhoog je bod, of laat het staan.',
+    keep: 'Laten staan',
+    value: (v: number) => (v >= 170 ? 'Pit' : String(v)),
+    lower: 'Lager',
+    higher: 'Hoger',
+    say: (value: string, trump: string) => `${value} ${trump.toLowerCase()}!`,
+    pass: ['Pas.', 'Ik pas.', 'Nee, pas.'],
+    passedOut: 'Ingepast: er wordt opnieuw gedeeld.',
+    contract: (value: string, trump: string, who: string) => `${who}: ${value} ${trump}`,
+  },
   play: 'Spelen',
   passed: 'past',
   roundOver: 'Spel voorbij',
@@ -72,11 +89,13 @@ export const nl = {
     amsterdams: 'Amsterdams (maat heeft de slag: niet hoeven troeven)',
     rotterdams: 'Rotterdams (altijd troeven en overtroeven)',
     trumpMode: 'Troef bepalen',
+    bieden: 'Bieden (jullie regels): punten bieden op een kleur of sans',
     verplicht: 'Verplicht: speler na de deler kiest',
     vrij: 'Vrij: om de beurt kiezen of passen',
     utrechts: 'Utrechts: voorgestelde kleur spelen of passen',
     length: 'Lengte van een potje',
     lengths: {
+      p150: 'Tot 150 (afgerond op tientallen, bij bieden)',
       s16: '16 spellen',
       s8: '8 spellen (kort potje)',
       p1000: 'Tot 1000 punten',
@@ -134,6 +153,20 @@ export const nl = {
         'Je speelt met z’n vieren, twee tegen twee. Ome Henk zit tegenover je en is je maat.',
         'Er wordt gespeeld met 32 kaarten (7 tot en met aas). Iedereen krijgt er acht.',
         'Eén speler kiest troef. Zijn team moet daarna meer dan de helft van de punten halen.',
+      ],
+    },
+    {
+      title: 'Bieden (standaard)',
+      lines: [
+        'Na het delen biedt eerst de speler na de deler, daarna om de beurt. Je mag passen.',
+        'Een bod is punten op een troefkleur: minimaal 80, steeds 10 hoger, tot en met pit.',
+        'Sans (zonder troef) mag vanaf 70. Bij een gelijk getal gaat sans boven een kleur.',
+        'Passen de anderen na jouw bod, dan mag je nog één keer verhogen of het laten staan.',
+        'Haal je je bod (punten plus roem), dan krijgt ieder team zijn eigen punten.',
+        'Haal je het niet, dan ben je nat: de tegenpartij krijgt alles (162, bij sans 130) plus alle roem.',
+        'Elke hand wordt afgerond op tientallen (5 naar beneden, 6 naar boven). Wie het eerst 150 heeft, wint.',
+        'Past iedereen, dan wordt er opnieuw gedeeld. Vier gelijke plaatjes zijn hier 100 roem.',
+        'Tip: Boer of Nel van een kleur is 80 waard, allebei 90, en elke Aas 10 erbij.',
       ],
     },
     {

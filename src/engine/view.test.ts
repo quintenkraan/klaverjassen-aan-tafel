@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { PERSONALITIES } from './ai/profile';
 import { smartBotStep } from './ai/smart';
-import { createGame, DEFAULT_RULES, finishRound, totals } from './game';
+import { BIDDING_RULES, createGame, DEFAULT_RULES, finishRound, totals } from './game';
 import { createRng } from './rng';
-import { chooseTrump, playableCards } from './round';
+import { chooseTrump, placeBid, playableCards } from './round';
 import { sendSignal } from './signals';
 import type { GameState, Seat } from './types';
 import { fromView, HIDDEN_CARD, toView, viewFor } from './view';
@@ -124,5 +124,16 @@ describe('multiplayer-weergave', () => {
     game = finishRound({ ...game, round: r });
     const [a, b] = totals(game);
     expect(totals(viewFor(game, 1))).toEqual([b, a]);
+  });
+});
+
+describe('viewFor bij bieden', () => {
+  it('draait biedingen en contract mee', () => {
+    let g = createGame(BIDDING_RULES, 3);
+    g = { ...g, round: placeBid(g.round, g.rules, 0, 90, 'harten') };
+    const v = viewFor(g, 2);
+    expect(v.round.contract).toMatchObject({ seat: 2, value: 90 });
+    expect(v.round.bids?.[0]).toMatchObject({ seat: 2, bid: { seat: 2 } });
+    expect(v.round.turn).toBe(3);
   });
 });

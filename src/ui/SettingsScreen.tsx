@@ -4,6 +4,7 @@ import { nl } from '../i18n/nl';
 import type { Settings, View } from './storage';
 
 const LENGTHS: Record<string, GameLength> = {
+  p150: { kind: 'punten', target: 150 },
   s16: { kind: 'spellen', count: 16 },
   s8: { kind: 'spellen', count: 8 },
   p1000: { kind: 'punten', target: 1000 },
@@ -81,11 +82,18 @@ export function SettingsScreen({
         label={set.trumpMode}
         value={s.trumpMode}
         options={[
+          { value: 'bieden', label: set.bieden },
           { value: 'verplicht', label: set.verplicht },
           { value: 'vrij', label: set.vrij },
           { value: 'utrechts', label: set.utrechts },
         ]}
-        onChange={(trumpMode) => setS({ ...s, trumpMode })}
+        onChange={(trumpMode) =>
+          setS(
+            trumpMode === 'bieden'
+              ? { ...s, trumpMode, variant: 'amsterdams', length: LENGTHS.p150! }
+              : { ...s, trumpMode },
+          )
+        }
       />
       <Choice
         label={set.length}

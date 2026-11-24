@@ -7,6 +7,10 @@ import type { Seat } from '../../engine';
 export const ROOM = { minX: -4, maxX: 4, minZ: -9, maxZ: 9, height: 3.2 };
 
 export const TABLE_TOP = 0.76;
+/** Bar dicht bij de ramenkant: krukken, een smal gangpad, één rij tafeltjes, muur. */
+export const BAR = { x: -1.2, depth: 0.7, z0: -5.2, z1: 5.0, top: 1.1 };
+/** Tafeltjes langs de ramenkant. */
+export const WALL_TABLE_X = ROOM.minX + 0.55;
 /** Speeltafel: rechthoekig, voor de bank. */
 export const TABLE = { x: -2.9, z: -7.98, w: 1.0, d: 0.84 };
 export const BENCH_Z = -8.64;

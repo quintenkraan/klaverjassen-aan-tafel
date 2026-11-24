@@ -1,13 +1,13 @@
 import { partnerOf, strength } from './cards';
-import type { Card, Seat, Suit, Trick, Variant } from './types';
+import type { Card, Seat, Trick, Trump, Variant } from './types';
 
-function beats(a: Card, b: Card, trump: Suit): boolean {
+function beats(a: Card, b: Card, trump: Trump): boolean {
   if (a.suit === b.suit) return strength(a, trump) > strength(b, trump);
   return a.suit === trump;
 }
 
 /** Wie wint (of heeft op dit moment) de slag. Trick moet minstens één kaart bevatten. */
-export function trickWinner(trick: Trick, trump: Suit): Seat {
+export function trickWinner(trick: Trick, trump: Trump): Seat {
   let best = trick.cards[0];
   if (!best) throw new Error('Lege slag heeft geen winnaar');
   for (const pc of trick.cards.slice(1)) if (beats(pc.card, best.card, trump)) best = pc;
@@ -21,7 +21,7 @@ export function trickWinner(trick: Trick, trump: Suit): Seat {
  * - Niet kunnen overtroeven: ondertroeven mag niet, tenzij je alleen nog troef hebt.
  * - Amsterdams: heeft je maat de slag, dan mag je alles bijspelen.
  */
-export function legalCards(hand: Card[], trick: Trick, trump: Suit, variant: Variant): Card[] {
+export function legalCards(hand: Card[], trick: Trick, trump: Trump, variant: Variant): Card[] {
   const lead = trick.cards[0];
   if (!lead) return hand;
 

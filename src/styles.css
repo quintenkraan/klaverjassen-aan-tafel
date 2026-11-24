@@ -533,6 +533,49 @@ body:has(.setup) {
   justify-content: center;
   z-index: 6;
 }
+.bidpanel {
+  position: absolute;
+  left: 50%;
+  bottom: 215px;
+  transform: translateX(-50%);
+  z-index: 6;
+  width: min(92vw, 520px);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(20, 12, 6, 0.88);
+  color: #f6ecd8;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+.bidpanel__state {
+  margin: 0;
+  font-size: 0.9rem;
+}
+.bidpanel__value {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.bidpanel__value strong {
+  min-width: 3.2em;
+  font-size: 1.6rem;
+}
+.bidpanel__value button {
+  width: 44px;
+  height: 44px;
+  font-size: 1.4rem;
+}
+.bidpanel__trumps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.bidpanel__trumps button {
+  min-height: 40px;
+}
 .fan {
   position: absolute;
   left: 50%;
@@ -817,5 +860,10 @@ body:has(.setup) {
   }
   .bid {
     bottom: 150px;
+  }
+  .bidpanel {
+    bottom: 110px;
+    padding: 6px 8px;
+    gap: 4px;
   }
 }

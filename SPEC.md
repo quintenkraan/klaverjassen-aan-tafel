@@ -89,4 +89,9 @@ bewaren per zet), SettingsScreen.tsx, RulesScreen.tsx, App.tsx (start, hervatten
 - [x] Online multiplayer v1 (peer-to-peer, PeerJS). Host rekent, gasten sturen zetten.
       Engine: src/engine/view.ts (viewFor: gedraaid + afgeschermd per speler). Net: src/net/.
       UI: src/ui/online/ (lobby met code en link, ?tafel=CODE). Lege stoelen = bots.
+- [x] Bieden (eigen variant, standaard): src/engine/round.ts (placeBid, minBidFor, PIT_BID),
+      telling in scoreRound met contract, afronden in finishRound (roundTens), sans = troef 'sans'.
+      Bots: bidEstimate in ai/smart.ts. UI: src/ui/BidPanel.tsx. Tests: src/engine/bidding.test.ts.
+- [x] Café v4: bar naar de ramenkant met smal gangpad, zijdeur met hutje halverwege de ramenmuur,
+      hoofddeur en WC linksvoor, drie gelijke tafels langs de spiegelbank, portret, cafégasten.
 - [ ] Statistieken. Zie VOORSTEL-MORGEN.md voor de volgende stappen.

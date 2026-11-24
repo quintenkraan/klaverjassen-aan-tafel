@@ -7,6 +7,7 @@ maar pas op: hij snapt het niet altijd, en de tegenstanders kijken mee.
 ## Wat zit erin
 
 - Volledige klaverjasregels: bekennen, troeven, overtroeven, roem, stuk, pit en nat.
+- Standaard jullie eigen variant met **bieden** (80+, sans vanaf 70, pit), tot 150 afgeronde punten.
 - Varianten: Rotterdams of Amsterdams; troef verplicht, vrij of Utrechts; 8 of 16 spellen,
   of tot 1000/1500 punten.
 - Bots met karakter en geheugen, in drie sterktes (makkelijk, gemiddeld, sterk).

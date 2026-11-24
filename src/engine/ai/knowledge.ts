@@ -1,5 +1,5 @@
 import { cardId, createDeck, sameCard, strength } from '../cards';
-import type { Card, PlayedCard, RoundState, Rules, Seat, Suit } from '../types';
+import type { Card, PlayedCard, RoundState, Rules, Seat, Suit, Trump } from '../types';
 
 /** Wat een bot denkt te weten. Met slecht geheugen vergeet hij gespeelde kaarten. */
 export interface Knowledge {
@@ -43,7 +43,13 @@ export function buildKnowledge(
     for (const pc of trick.cards.slice(1)) {
       if (pc.card.suit === lead) continue;
       voids[pc.seat]!.add(lead);
-      if (trump && lead !== trump && pc.card.suit !== trump && rules.variant === 'rotterdams') {
+      if (
+        trump &&
+        trump !== 'sans' &&
+        lead !== trump &&
+        pc.card.suit !== trump &&
+        rules.variant === 'rotterdams'
+      ) {
         voids[pc.seat]!.add(trump);
       }
     }
@@ -57,6 +63,6 @@ export function buildKnowledge(
 }
 
 /** Is dit de hoogste nog niet geziene kaart van zijn kleur? */
-export function isBoss(card: Card, k: Knowledge, trump: Suit): boolean {
+export function isBoss(card: Card, k: Knowledge, trump: Trump): boolean {
   return !k.unseen.some((u) => u.suit === card.suit && strength(u, trump) > strength(card, trump));
 }

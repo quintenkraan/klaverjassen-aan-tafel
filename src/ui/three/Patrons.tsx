@@ -9,6 +9,7 @@ import {
   type Mesh,
   type MeshStandardMaterial,
 } from 'three';
+import { BAR, WALL_TABLE_X } from './layout';
 import { lowerFor, usePerson, type AnimKey, type ClipSet, type PersonKey } from './models';
 
 /** Krukken staan iets hoger dan stoelen: zo veel hoger komt een gast aan de bar te zitten. */
@@ -30,12 +31,14 @@ interface Guest {
 }
 
 /** Vaste gasten: aan twee tafeltjes in gesprek, een paar aan de bar, een eenling bij het raam. */
+const T = WALL_TABLE_X;
+const STOOL_X = BAR.x - 0.43;
 const GUESTS: Guest[] = [
-  // Tafeltje langs de muur vlak bij jullie: twee in gesprek
+  // Tafeltje langs de ramen vlak bij jullie: twee in gesprek
   {
     who: 'henk',
-    x: -3.2,
-    z: -4.9,
+    x: T,
+    z: -5.0,
     facing: Math.PI,
     tint: '#c9d3ff',
     moods: ['talk', 'idle', 'laugh', 'idle'],
@@ -44,8 +47,8 @@ const GUESTS: Guest[] = [
   },
   {
     who: 'ria',
-    x: -3.2,
-    z: -5.9,
+    x: T,
+    z: -6.0,
     facing: 0,
     tint: '#ffd9c9',
     moods: ['idle', 'nod', 'laugh', 'talk'],
@@ -55,40 +58,19 @@ const GUESTS: Guest[] = [
   // Eenling met een biertje
   {
     who: 'henk',
-    x: -3.2,
-    z: -2.7,
+    x: T,
+    z: -3.1,
     facing: Math.PI,
     tint: '#fff0c4',
     moods: ['idle', 'think'],
     period: 9,
     offset: 3,
   },
-  // Verderop nog een stel
-  {
-    who: 'sjaak',
-    x: -3.2,
-    z: 1.7,
-    facing: Math.PI,
-    tint: '#d7ffd2',
-    moods: ['think', 'talk', 'idle'],
-    period: 7,
-    offset: 2.1,
-  },
-  {
-    who: 'ria',
-    x: -3.2,
-    z: 0.7,
-    facing: 0,
-    tint: '#e6d0ff',
-    moods: ['talk', 'laugh', 'idle', 'nod'],
-    period: 6,
-    offset: 0.4,
-  },
-  // Voorin aan de wandtafel: één op de bank, één op een stoel
+  // Voorbij het hutje aan de wandtafel: één op de bank, één op een stoel
   {
     who: 'sjaak',
     x: -3.72,
-    z: 6.2,
+    z: 2.1,
     facing: Math.PI / 2,
     tint: '#ffe0b0',
     moods: ['talk', 'idle', 'laugh'],
@@ -98,17 +80,38 @@ const GUESTS: Guest[] = [
   {
     who: 'ria',
     x: -2.85,
-    z: 5.8,
+    z: 1.7,
     facing: -Math.PI / 2,
     tint: '#cfe8ff',
     moods: ['idle', 'nod', 'talk'],
     period: 6.5,
     offset: 3.5,
   },
+  // Verderop nog een stel
+  {
+    who: 'sjaak',
+    x: T,
+    z: 4.5,
+    facing: Math.PI,
+    tint: '#d7ffd2',
+    moods: ['think', 'talk', 'idle'],
+    period: 7,
+    offset: 2.1,
+  },
+  {
+    who: 'ria',
+    x: T,
+    z: 3.5,
+    facing: 0,
+    tint: '#e6d0ff',
+    moods: ['talk', 'laugh', 'idle', 'nod'],
+    period: 6,
+    offset: 0.4,
+  },
   // Aan de bar
   {
     who: 'sjaak',
-    x: 0.57,
+    x: STOOL_X,
     z: -3.2,
     facing: Math.PI / 2,
     stool: true,
@@ -119,7 +122,7 @@ const GUESTS: Guest[] = [
   },
   {
     who: 'henk',
-    x: 0.57,
+    x: STOOL_X,
     z: -1.22,
     facing: Math.PI / 2,
     stool: true,
@@ -207,15 +210,15 @@ export function Patrons({ clips }: { clips: ClipSet }) {
         <Patron key={i} g={g} clips={clips} />
       ))}
       {/* Bier op tafel bij de pratende gasten en op de bar */}
-      <Beer p={[-3.1, 0.76, -5.2]} />
-      <Beer p={[-3.3, 0.76, -5.6]} />
-      <Beer p={[-3.1, 0.76, -3.0]} />
-      <Beer p={[-3.1, 0.76, 1.4]} />
-      <Beer p={[-3.3, 0.76, 1.0]} />
-      <Beer p={[-3.55, 0.76, 6.2]} />
-      <Beer p={[-3.25, 0.76, 5.8]} />
-      <Beer p={[0.8, BAR_TOP, -3.15]} />
-      <Beer p={[0.8, BAR_TOP, -1.3]} />
+      <Beer p={[T + 0.1, 0.76, -5.3]} />
+      <Beer p={[T - 0.1, 0.76, -5.7]} />
+      <Beer p={[T + 0.1, 0.76, -3.4]} />
+      <Beer p={[-3.55, 0.76, 2.1]} />
+      <Beer p={[-3.25, 0.76, 1.7]} />
+      <Beer p={[T + 0.1, 0.76, 4.2]} />
+      <Beer p={[T - 0.1, 0.76, 3.8]} />
+      <Beer p={[BAR.x + 0.18, BAR_TOP, -3.15]} />
+      <Beer p={[BAR.x + 0.18, BAR_TOP, -1.3]} />
     </>
   );
 }

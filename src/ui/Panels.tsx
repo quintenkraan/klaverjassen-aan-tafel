@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import {
   applySignalPenalties,
+  roundTens,
   scoreRound,
   teamOf,
   totals,
@@ -54,7 +55,8 @@ export function ScoreSheet({ game, children }: { game: GameState; children?: Rea
 
 export function RoundOverlay({ game, onNext }: { game: GameState; onNext: () => void }) {
   const r = game.round;
-  const s = applySignalPenalties(scoreRound(r.tricks, r.playingTeam!), game.signals);
+  const s = applySignalPenalties(scoreRound(r.tricks, r.playingTeam!, r.contract), game.signals);
+  const auction = game.rules.trumpMode === 'bieden';
   return (
     <div className="overlay">
       <h2>
@@ -64,6 +66,7 @@ export function RoundOverlay({ game, onNext }: { game: GameState; onNext: () => 
       </h2>
       <p>
         {nl.trump} {nl.suits[r.trump!]}, {nl.plays}: {nl.teams[teamOf(r.trumpChooser!)]}
+        {r.contract && ` (${nl.bidding.value(r.contract.value)})`}
       </p>
       <table>
         <thead>
@@ -89,6 +92,13 @@ export function RoundOverlay({ game, onNext }: { game: GameState; onNext: () => 
             <th>{s.total[0]}</th>
             <th>{s.total[1]}</th>
           </tr>
+          {auction && (
+            <tr>
+              <th>{nl.onSheet}</th>
+              <th>{roundTens(s.total[0])}</th>
+              <th>{roundTens(s.total[1])}</th>
+            </tr>
+          )}
         </tbody>
       </table>
       {s.forfeit !== undefined && <p className="penalty">{nl.forfeit(nl.teams[s.forfeit])}</p>}

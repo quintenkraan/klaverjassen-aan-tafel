@@ -48,13 +48,43 @@ export function isGameOver(game: GameState): boolean {
   return Math.max(...totals(game)) >= length.target;
 }
 
+/** Jullie variant: bieden, Amsterdams, wie het eerst 150 (afgeronde) punten heeft. */
+export const BIDDING_RULES: Rules = {
+  variant: 'amsterdams',
+  trumpMode: 'bieden',
+  length: { kind: 'punten', target: 150 },
+  signals: { enabled: true, penalty: 'punten' },
+};
+
+/** Afronden op tientallen: 5 naar beneden, 6 naar boven (132 wordt 13, 76 wordt 8). */
+export function roundTens(points: number): number {
+  return Math.floor((points + 4) / 10);
+}
+
 /** Telt het afgelopen spel (inclusief seinstraffen) en deelt het volgende. */
 export function finishRound(game: GameState): GameState {
   const { round } = game;
-  if (round.phase !== 'klaar' || round.playingTeam === null)
-    throw new Error('Spel is nog niet klaar');
+  if (round.phase !== 'klaar') throw new Error('Spel is nog niet klaar');
   const roundIndex = game.roundIndex + 1;
-  const score = applySignalPenalties(scoreRound(round.tricks, round.playingTeam), game.signals);
+  if (round.playingTeam === null) {
+    // Ingepast (niemand bood): de volgende deler deelt opnieuw, zonder telling.
+    return {
+      ...game,
+      roundIndex,
+      signals: resetForRound(game.signals),
+      round: startRound(
+        nextSeat(round.dealer),
+        game.rules,
+        createRng(roundSeed(game.seed, roundIndex)),
+      ),
+    };
+  }
+  let score = applySignalPenalties(
+    scoreRound(round.tricks, round.playingTeam, round.contract),
+    game.signals,
+  );
+  if (game.rules.trumpMode === 'bieden')
+    score = { ...score, total: [roundTens(score.total[0]), roundTens(score.total[1])] };
   const next: GameState = {
     ...game,
     roundIndex,

@@ -2,7 +2,7 @@ import { Instance, Instances } from '@react-three/drei';
 import { useEffect, useMemo, useState } from 'react';
 import { CanvasTexture, RepeatWrapping, SRGBColorSpace, TextureLoader, type Texture } from 'three';
 import { createRng } from '../../engine';
-import { BENCH_Z, ROOM, TABLE, TABLE_TOP } from './layout';
+import { BAR, BENCH_Z, ROOM, TABLE, TABLE_TOP, WALL_TABLE_X } from './layout';
 
 /**
  * Het bruine café, naar jouw foto's (zie de plattegrond in layout.ts):
@@ -23,8 +23,9 @@ const OCHRE = '#b36a2c';
 const CURTAIN = '#25382b';
 const BRASS = '#b8913a';
 
-const BAR = { x: 1.0, depth: 0.7, z0: -5.2, z1: 5.0, top: 1.1 };
-const BACKBAR = { x: 3.15, z0: -5.2, z1: 5.0 };
+const BACKBAR = { x: 0.15, z0: -5.2, z1: 5.0 };
+/** Achter de achterbar is het dicht; de wand daar loopt tot de linkermuur. */
+const BEHIND_X = BACKBAR.x + 0.9;
 
 function canvasTexture(
   w: number,
@@ -141,7 +142,16 @@ function useTextures() {
         ctx.strokeRect(12, 12, 176, 256);
       }),
     );
-    return { floor, checker, planks, neon, chalk, paintings, posters };
+    const wc = canvasTexture(256, 128, (ctx) => {
+      ctx.fillStyle = '#f2ead8';
+      ctx.fillRect(0, 0, 256, 128);
+      ctx.fillStyle = '#1f2a3a';
+      ctx.font = 'bold 84px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('WC', 128, 68);
+    });
+    return { floor, checker, planks, neon, chalk, paintings, posters, wc };
   }, []);
 }
 
@@ -392,7 +402,7 @@ function LeftWall({ t }: { t: ReturnType<typeof useTextures> }) {
         </group>
       ))}
       <pointLight position={[x + 0.8, 2, -6]} intensity={0.5} distance={4} color="#7f95c9" />
-      {[-1, 2.5, 6].map((z, i) => (
+      {[-2.6, 3.3, 7.2].map((z, i) => (
         <group key={z}>
           <mesh position={[x + 0.05, 1.7, z]} rotation-y={Math.PI / 2}>
             <planeGeometry args={[0.5, 0.7]} />
@@ -588,6 +598,27 @@ function PanelWall({ w, rot = 0, p }: { w: number; rot?: number; p: [number, num
   );
 }
 
+/** Een deur in een muur. Lokaal: muur op z = 0, de zaal aan de +z-kant. */
+function Door({ p, rotY, sign }: { p: [number, number, number]; rotY: number; sign?: Texture }) {
+  return (
+    <group position={p} rotation-y={rotY}>
+      <Box p={[0, 1.1, 0.04]} s={[1.0, 2.2, 0.08]} c={WOOD_DARK} />
+      <Box p={[0, 1.1, 0.03]} s={[1.12, 2.3, 0.05]} c={WOOD} />
+      <mesh position={[0, 1.45, 0.09]}>
+        <planeGeometry args={[0.6, 0.9]} />
+        <meshStandardMaterial color="#1a2438" emissive="#31456e" emissiveIntensity={0.4} />
+      </mesh>
+      <Box p={[0.35, 1.05, 0.12]} s={[0.04, 0.2, 0.04]} c={BRASS} m={0.9} r={0.3} />
+      {sign && (
+        <mesh position={[0, 2.42, 0.07]}>
+          <planeGeometry args={[0.36, 0.18]} />
+          <meshStandardMaterial map={sign} emissive="#ffffff" emissiveIntensity={0.25} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
 /**
  * Het hutje achter de voordeur (herkenningspunt van dit café): een donkerhouten portaal van
  * ruim een meter breed met glas bovenin. Voor je is het dicht, je loopt er links of rechts uit.
@@ -619,6 +650,8 @@ function Portal({ x, z }: { x: number; z: number }) {
           </group>
         );
       })}
+      {/* De zijdeur zelf, in de muur achter het hutje */}
+      <Door p={[x, 0, z]} rotY={Math.PI} />
       {/* Plafondje, de rode mat en een warm lampje */}
       <Box p={[x, 2.56, mid]} s={[w + 0.12, 0.03, d + 0.05]} c="#160e08" />
       <Box p={[x, 0.006, mid + 0.05]} s={[w + 1.2, 0.01, d - 0.35]} c="#7d1a16" r={1} />
@@ -678,7 +711,6 @@ function WallTable({ z }: { z: number }) {
 
 function Front({ t }: { t: ReturnType<typeof useTextures> }) {
   const z = maxZ;
-  const doors = [-2.0];
   return (
     <group>
       <mesh position={[0, H / 2, z]} rotation-y={Math.PI}>
@@ -686,7 +718,7 @@ function Front({ t }: { t: ReturnType<typeof useTextures> }) {
         <meshStandardMaterial color={OCHRE} roughness={0.95} />
       </mesh>
       <Box p={[0, 0.4, z - 0.03]} s={[W, 0.8, 0.06]} c={PANEL} />
-      {[-3.25, 0.65, 2.9].map((x) => (
+      {[-3.25, -1.1, 0.65].map((x) => (
         <Window key={x} p={[x, 1.75, z - 0.04]} rotY={Math.PI} w={1.3} h={1.8} />
       ))}
       <mesh position={[0.65, 2.85, z - 0.08]} rotation-y={Math.PI}>
@@ -694,38 +726,56 @@ function Front({ t }: { t: ReturnType<typeof useTextures> }) {
         <meshBasicMaterial map={t.neon} transparent />
       </mesh>
       <pointLight position={[0.65, 2.7, z - 0.5]} intensity={0.6} distance={3} color="#ff3a2a" />
-      {doors.map((x) => (
-        <group key={x}>
-          {/* Deur */}
-          <Box p={[x, 1.1, z - 0.04]} s={[1.0, 2.2, 0.08]} c={WOOD_DARK} />
-          <mesh position={[x, 1.45, z - 0.09]} rotation-y={Math.PI}>
-            <planeGeometry args={[0.6, 0.9]} />
-            <meshStandardMaterial color="#1a2438" emissive="#31456e" emissiveIntensity={0.4} />
-          </mesh>
-          <Box p={[x + 0.35, 1.05, z - 0.12]} s={[0.04, 0.2, 0.04]} c={BRASS} m={0.9} r={0.3} />
-          {/* Houten portaal net binnen (zoals op de foto): je loopt er links of rechts uit */}
-          <Portal x={x} z={z} />
-        </group>
+      {/* Hoofdingang: helemaal links in de voorgevel (vanaf jouw plek gezien) */}
+      <Door p={[2.7, 0, z]} rotY={Math.PI} />
+    </group>
+  );
+}
+
+/**
+ * Zijingang halverwege de rechtermuur (ramenkant) met het houten hutje ervoor: je loopt er
+ * links of rechts omheen het café in.
+ */
+function SideEntrance() {
+  return (
+    <group position={[minX, 0, 0]} rotation-y={-Math.PI / 2}>
+      <Portal x={0} z={0} />
+    </group>
+  );
+}
+
+/** Dicht achter de achterbar, met de WC-deur net voorbij het eind van de bar. */
+function BehindBar({ t }: { t: ReturnType<typeof useTextures> }) {
+  const w = maxX - BEHIND_X;
+  const cx = (maxX + BEHIND_X) / 2;
+  return (
+    <group>
+      {[BAR.z0, BAR.z1].map((z) => (
+        <Box key={z} p={[cx, H / 2, z]} s={[w, H, 0.12]} c="#2a1c12" r={0.9} />
       ))}
+      <Door p={[cx + 0.3, 0, BAR.z1 + 0.06]} rotY={0} sign={t.wc} />
     </group>
   );
 }
 
 /** De speeltafel: rechthoekig houten café-tafeltje met een groen kaartkleedje. */
-export function GameTable() {
+/** De speeltafel (met groen kleedje), of een van de gelijke tafels ernaast langs de bank. */
+export function GameTable({ x = TABLE.x, mat = true }: { x?: number; mat?: boolean }) {
   return (
-    <group position={[TABLE.x, 0, TABLE.z]}>
+    <group position={[x, 0, TABLE.z]}>
       <mesh position={[0, TABLE_TOP - 0.022, 0]} receiveShadow castShadow>
         <boxGeometry args={[TABLE.w, 0.04, TABLE.d]} />
         <meshStandardMaterial color={WOOD} roughness={0.45} />
       </mesh>
-      <mesh position={[0, TABLE_TOP - 0.001, 0]} receiveShadow>
-        <boxGeometry args={[TABLE.w - 0.16, 0.004, TABLE.d - 0.14]} />
-        <meshStandardMaterial color="#1d5a37" roughness={1} />
-      </mesh>
+      {mat && (
+        <mesh position={[0, TABLE_TOP - 0.001, 0]} receiveShadow>
+          <boxGeometry args={[TABLE.w - 0.16, 0.004, TABLE.d - 0.14]} />
+          <meshStandardMaterial color="#1d5a37" roughness={1} />
+        </mesh>
+      )}
       <Box p={[0, TABLE_TOP / 2, 0]} s={[0.08, TABLE_TOP - 0.05, 0.08]} c={WOOD_DARK} />
       <Box p={[0, 0.02, 0]} s={[0.5, 0.04, 0.45]} c={WOOD_DARK} />
-      <Candle p={[TABLE.w / 2 - 0.08, TABLE_TOP, TABLE.d / 2 - 0.08]} light />
+      <Candle p={[TABLE.w / 2 - 0.08, TABLE_TOP, TABLE.d / 2 - 0.08]} light={mat} />
     </group>
   );
 }
@@ -756,7 +806,7 @@ export function Cafe() {
         <planeGeometry args={[W, D]} />
         <meshStandardMaterial map={t.floor} roughness={0.85} />
       </mesh>
-      <mesh rotation-x={-Math.PI / 2} rotation-z={Math.PI / 2} position={[0.15, 0.002, 0]}>
+      <mesh rotation-x={-Math.PI / 2} rotation-z={Math.PI / 2} position={[BAR.x - 1.1, 0.002, 0]}>
         <planeGeometry args={[D - 1, 0.07]} />
         <meshStandardMaterial map={t.checker} roughness={0.8} />
       </mesh>
@@ -778,17 +828,25 @@ export function Cafe() {
       <Front t={t} />
 
       <GameTable />
-      <Chair p={[TABLE.x + 0.3, 0, TABLE.z + 0.73]} rotY={Math.PI} />
-      <Chair p={[TABLE.x - 0.3, 0, TABLE.z + 0.73]} rotY={Math.PI} />
+      {/* Langs de spiegelbank, links van jullie: nog twee precies zulke tafels */}
+      {[TABLE.x, TABLE.x + 1.25, TABLE.x + 2.5].map((x, i) => (
+        <group key={x}>
+          {i > 0 && <GameTable x={x} mat={false} />}
+          <Chair p={[x + 0.3, 0, TABLE.z + 0.73]} rotY={Math.PI} />
+          <Chair p={[x - 0.3, 0, TABLE.z + 0.73]} rotY={Math.PI} />
+        </group>
+      ))}
 
-      <Barrel p={[-1.0, 0, -7.2]} />
-      {/* Langs de rechtermuur tafeltjes; tussen bar en tafeltjes alleen het gangpad. */}
-      <SmallTable p={[-3.2, 0, -5.4]} />
-      <SmallTable p={[-3.2, 0, -3.2]} />
-      <SmallTable p={[-3.2, 0, -1.0]} />
-      <SmallTable p={[-3.2, 0, 1.2]} />
-      <SmallTable p={[-3.2, 0, 3.4]} />
-      <WallTable z={6.0} />
+      <Barrel p={[1.7, 0, -6.9]} />
+      {/* Ramenkant: één rij tafeltjes, dan het gangpad, dan de krukken van de bar. */}
+      <SmallTable p={[WALL_TABLE_X, 0, -5.5]} />
+      <SmallTable p={[WALL_TABLE_X, 0, -3.6]} />
+      <SmallTable p={[WALL_TABLE_X, 0, -1.8]} />
+      <SideEntrance />
+      <WallTable z={1.9} />
+      <SmallTable p={[WALL_TABLE_X, 0, 4.0]} />
+      <SmallTable p={[WALL_TABLE_X, 0, 6.4]} />
+      <BehindBar t={t} />
       <Portrait />
     </group>
   );

@@ -10,6 +10,7 @@ import {
   isGameOver,
   passBid,
   PERSONALITIES,
+  placeBid,
   playCard,
   sendSignal,
   type Card,
@@ -18,6 +19,7 @@ import {
   type Seat,
   type SignalEvent,
   type Suit,
+  type Trump,
 } from '../engine';
 import { nl } from '../i18n/nl';
 import type { Speech } from './Avatar';
@@ -38,6 +40,7 @@ export type Action =
   | { kind: 'play'; card: Card }
   | { kind: 'pass' }
   | { kind: 'trump'; suit: Suit }
+  | { kind: 'bid'; value: number; trump: Trump }
   | { kind: 'signal'; gesture: Gesture }
   | { kind: 'accuse' }
   | { kind: 'next' }
@@ -54,6 +57,8 @@ export interface GameController {
   play: (card: Card) => void;
   pass: () => void;
   choose: (suit: Suit) => void;
+  /** Bieden: een bod op een troef (of sans). */
+  bid: (value: number, trump: Trump) => void;
   signal: (gesture: Gesture) => void;
   accuse: () => void;
   nextRound: () => void;
@@ -169,6 +174,14 @@ export function useGame(
     setGame(next);
   };
 
+  // Ingepast (niemand bood): even laten zien, dan deelt de volgende opnieuw.
+  useEffect(() => {
+    if (round.phase !== 'klaar' || round.playingTeam !== null) return;
+    const t = setTimeout(() => commit(finishRound(gameRef.current)), 2200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game]);
+
   // Bots: eventueel eerst seinen, daarna (volgende tik) een zet.
   useEffect(() => {
     if (pause || humans.includes(round.turn) || round.phase === 'klaar') return;
@@ -226,6 +239,13 @@ export function useGame(
         case 'trump':
           if (myTurn) commit({ ...g, round: chooseTrump(g.round, g.rules, seat, action.suit) });
           break;
+        case 'bid':
+          if (myTurn)
+            commit({
+              ...g,
+              round: placeBid(g.round, g.rules, seat, action.value, action.trump),
+            });
+          break;
         case 'signal': {
           if (!g.rules.signals.enabled || g.round.phase !== 'spelen') break;
           const { state, event } = sendSignal(
@@ -273,6 +293,7 @@ export function useGame(
     play: (card) => apply(0, { kind: 'play', card }),
     pass: () => apply(0, { kind: 'pass' }),
     choose: (suit) => apply(0, { kind: 'trump', suit }),
+    bid: (value, trump) => apply(0, { kind: 'bid', value, trump }),
     signal: (gesture) => apply(0, { kind: 'signal', gesture }),
     accuse: () => apply(0, { kind: 'accuse' }),
     nextRound: () => apply(0, { kind: 'next' }),

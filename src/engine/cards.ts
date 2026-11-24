@@ -1,4 +1,4 @@
-import type { Card, Rank, Seat, Suit, Team } from './types';
+import type { Card, Rank, Seat, Suit, Team, Trump } from './types';
 
 export const SUITS: readonly Suit[] = ['klaveren', 'ruiten', 'harten', 'schoppen'];
 /** Natuurlijke volgorde, gebruikt voor roem (reeksen). */
@@ -32,12 +32,12 @@ export function createDeck(): Card[] {
   return SUITS.flatMap((suit) => RANKS.map((rank) => ({ suit, rank })));
 }
 
-export function cardPoints(card: Card, trump: Suit): number {
+export function cardPoints(card: Card, trump: Trump): number {
   return card.suit === trump ? TRUMP_POINTS[card.rank] : PLAIN_POINTS[card.rank];
 }
 
 /** Sterkte binnen de eigen kleur (hoger = sterker). */
-export function strength(card: Card, trump: Suit): number {
+export function strength(card: Card, trump: Trump): number {
   return (card.suit === trump ? TRUMP_ORDER : PLAIN_ORDER).indexOf(card.rank);
 }
 
@@ -50,7 +50,7 @@ export function cardId(card: Card): string {
 }
 
 /** Hand sorteren voor weergave: troef eerst, kleuren afwisselend zwart/rood, hoog naar laag. */
-export function sortHand(hand: Card[], trump: Suit | null): Card[] {
+export function sortHand(hand: Card[], trump: Trump | null): Card[] {
   const order: Suit[] = ['klaveren', 'ruiten', 'schoppen', 'harten'];
   const suitRank = (s: Suit) => (s === trump ? -1 : order.indexOf(s));
   const rankOf = (c: Card) => (c.suit === trump ? TRUMP_ORDER : PLAIN_ORDER).indexOf(c.rank);

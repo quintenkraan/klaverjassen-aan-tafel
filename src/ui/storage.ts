@@ -1,6 +1,6 @@
 import {
   DEFAULT_AGREEMENT,
-  DEFAULT_RULES,
+  BIDDING_RULES as DEFAULT_RULES,
   GESTURES,
   MEANINGS,
   type Agreement,
@@ -27,6 +27,8 @@ export interface TableConfig {
 export type View = '3d' | '2d';
 
 export interface Settings {
+  /** 2 = sinds de biedvariant; oudere instellingen krijgen eenmalig die regels. */
+  ruleset: 2;
   view: View;
   variant: Variant;
   trumpMode: TrumpMode;
@@ -44,6 +46,7 @@ export interface SavedGame {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  ruleset: 2,
   view: '3d',
   variant: DEFAULT_RULES.variant,
   trumpMode: DEFAULT_RULES.trumpMode,
@@ -109,11 +112,16 @@ function validAgreement(value: unknown): Agreement {
 export function loadSettings(kv: KV | null = defaultStore()): Settings {
   const v = (read(kv, SETTINGS_KEY) ?? {}) as Partial<Settings>;
   const d = DEFAULT_SETTINGS;
+  // Eenmalig naar jullie regels (bieden), de rest van je instellingen blijft staan.
+  const old = v.ruleset !== 2;
   return {
+    ruleset: 2,
     view: oneOf(v.view, ['3d', '2d'] as const, d.view),
-    variant: oneOf(v.variant, ['amsterdams', 'rotterdams'] as const, d.variant),
-    trumpMode: oneOf(v.trumpMode, ['verplicht', 'vrij', 'utrechts'] as const, d.trumpMode),
-    length: validLength(v.length),
+    variant: old ? d.variant : oneOf(v.variant, ['amsterdams', 'rotterdams'] as const, d.variant),
+    trumpMode: old
+      ? d.trumpMode
+      : oneOf(v.trumpMode, ['bieden', 'verplicht', 'vrij', 'utrechts'] as const, d.trumpMode),
+    length: old ? d.length : validLength(v.length),
     difficulty: oneOf(v.difficulty, ['makkelijk', 'gemiddeld', 'sterk'] as const, d.difficulty),
     signals: {
       enabled: typeof v.signals?.enabled === 'boolean' ? v.signals.enabled : d.signals.enabled,

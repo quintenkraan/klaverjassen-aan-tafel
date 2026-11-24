@@ -19,7 +19,24 @@ export type Pair = [number, number];
 export type Variant = 'amsterdams' | 'rotterdams';
 /** verplicht: speler na de deler kiest troef. vrij: om de beurt kiezen of passen.
  *  utrechts: een voorgestelde kleur spelen of passen. */
-export type TrumpMode = 'verplicht' | 'utrechts' | 'vrij';
+export type TrumpMode = 'verplicht' | 'utrechts' | 'vrij' | 'bieden';
+/** Troef: een kleur, of 'sans' (zonder troef, alleen bij bieden). */
+export type Trump = Suit | 'sans';
+
+/**
+ * Bieden: punten (70..160, of PIT_BID voor pit) op een troef. Sans gaat bij een gelijk getal
+ * boven een kleur (80 sans boven 80 harten).
+ */
+export interface Bid {
+  seat: Seat;
+  value: number;
+  trump: Trump;
+}
+/** Eén beurt in het bieden: een bod, of null voor passen. */
+export interface BidTurn {
+  seat: Seat;
+  bid: Bid | null;
+}
 export type GameLength = { kind: 'spellen'; count: number } | { kind: 'punten'; target: number };
 
 export interface Rules {
@@ -102,7 +119,7 @@ export interface RoundState {
   hands: Card[][];
   phase: Phase;
   turn: Seat;
-  trump: Suit | null;
+  trump: Trump | null;
   trumpChooser: Seat | null;
   playingTeam: Team | null;
   /** Alleen bij utrechts: de voorgestelde troefkleur. */
@@ -110,11 +127,17 @@ export interface RoundState {
   passes: number;
   currentTrick: Trick;
   tricks: CompletedTrick[];
+  /** Alleen bij bieden: alle beurten, het hoogste bod, en of de bieder nog mag verhogen. */
+  bids?: BidTurn[];
+  contract?: Bid | null;
+  lastChance?: boolean;
 }
 
 export interface BidOptions {
   canPass: boolean;
   suits: Suit[];
+  /** Bij bieden: het laagste bod dat mag, per troef (null = kan niet meer hoger). */
+  minBid?: Record<Trump, number | null>;
 }
 
 export interface RoundScore {
@@ -130,6 +153,8 @@ export interface RoundScore {
   forfeit?: Team;
   /** Strafpunten door seinen, per team dat ze kreeg. */
   penalty?: Pair;
+  /** Bij bieden: het contract. total is dan afgerond op tientallen. */
+  contract?: Bid;
 }
 
 export interface GameState {
