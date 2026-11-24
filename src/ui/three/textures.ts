@@ -82,3 +82,30 @@ export function cardTexture(card: Card | null): Texture {
   }
   return tex;
 }
+
+/**
+ * Voorkant van een kaart in andermans hand: wit met vage tekens, van een afstand niet te lezen.
+ * Zo houdt iedereen zijn kaarten met de voorkant naar zich toe, zonder dat jij iets ziet.
+ */
+export function blurredFaceTexture(): Texture {
+  let tex = cache.get('vaag');
+  if (!tex) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 90;
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = '#f4f1ea';
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 64, 90, 6);
+    ctx.fill();
+    ctx.filter = 'blur(3px)';
+    ctx.fillStyle = 'rgba(120, 110, 110, 0.45)';
+    ctx.fillRect(8, 8, 10, 16);
+    ctx.fillRect(24, 34, 16, 22);
+    ctx.fillRect(46, 66, 10, 16);
+    tex = new CanvasTexture(canvas);
+    tex.colorSpace = SRGBColorSpace;
+    cache.set('vaag', tex);
+  }
+  return tex;
+}

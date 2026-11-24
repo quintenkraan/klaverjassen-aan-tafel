@@ -31,10 +31,11 @@ interface Guest {
 
 /** Vaste gasten: aan twee tafeltjes in gesprek, een paar aan de bar, een eenling bij het raam. */
 const GUESTS: Guest[] = [
+  // Tafeltje langs de muur vlak bij jullie: twee in gesprek
   {
     who: 'henk',
-    x: -1.0,
-    z: -4.8,
+    x: -3.2,
+    z: -4.9,
     facing: Math.PI,
     tint: '#c9d3ff',
     moods: ['talk', 'idle', 'laugh', 'idle'],
@@ -43,34 +44,15 @@ const GUESTS: Guest[] = [
   },
   {
     who: 'ria',
-    x: -1.0,
-    z: -5.8,
+    x: -3.2,
+    z: -5.9,
     facing: 0,
     tint: '#ffd9c9',
     moods: ['idle', 'nod', 'laugh', 'talk'],
     period: 5.5,
     offset: 1.3,
   },
-  {
-    who: 'sjaak',
-    x: -0.7,
-    z: -2.1,
-    facing: Math.PI,
-    tint: '#d7ffd2',
-    moods: ['think', 'talk', 'idle'],
-    period: 7,
-    offset: 2.1,
-  },
-  {
-    who: 'ria',
-    x: -0.7,
-    z: -3.1,
-    facing: 0,
-    tint: '#e6d0ff',
-    moods: ['talk', 'laugh', 'idle', 'nod'],
-    period: 6,
-    offset: 0.4,
-  },
+  // Eenling met een biertje
   {
     who: 'henk',
     x: -3.2,
@@ -81,6 +63,49 @@ const GUESTS: Guest[] = [
     period: 9,
     offset: 3,
   },
+  // Verderop nog een stel
+  {
+    who: 'sjaak',
+    x: -3.2,
+    z: 1.7,
+    facing: Math.PI,
+    tint: '#d7ffd2',
+    moods: ['think', 'talk', 'idle'],
+    period: 7,
+    offset: 2.1,
+  },
+  {
+    who: 'ria',
+    x: -3.2,
+    z: 0.7,
+    facing: 0,
+    tint: '#e6d0ff',
+    moods: ['talk', 'laugh', 'idle', 'nod'],
+    period: 6,
+    offset: 0.4,
+  },
+  // Voorin aan de wandtafel: één op de bank, één op een stoel
+  {
+    who: 'sjaak',
+    x: -3.72,
+    z: 6.2,
+    facing: Math.PI / 2,
+    tint: '#ffe0b0',
+    moods: ['talk', 'idle', 'laugh'],
+    period: 6.5,
+    offset: 0.8,
+  },
+  {
+    who: 'ria',
+    x: -2.85,
+    z: 5.8,
+    facing: -Math.PI / 2,
+    tint: '#cfe8ff',
+    moods: ['idle', 'nod', 'talk'],
+    period: 6.5,
+    offset: 3.5,
+  },
+  // Aan de bar
   {
     who: 'sjaak',
     x: 0.57,
@@ -105,9 +130,10 @@ const GUESTS: Guest[] = [
   },
 ];
 
-function Beer({ p }: { p: [number, number, number] }) {
+/** Glas bier; `size` 2 is een flinke pul. */
+export function Beer({ p, size = 1 }: { p: [number, number, number]; size?: number }) {
   return (
-    <group position={p}>
+    <group position={p} scale={size}>
       <mesh position={[0, 0.07, 0]}>
         <cylinderGeometry args={[0.032, 0.027, 0.14, 14]} />
         <meshStandardMaterial color="#d99a2b" transparent opacity={0.85} roughness={0.15} />
@@ -181,11 +207,13 @@ export function Patrons({ clips }: { clips: ClipSet }) {
         <Patron key={i} g={g} clips={clips} />
       ))}
       {/* Bier op tafel bij de pratende gasten en op de bar */}
-      <Beer p={[-0.92, 0.76, -5.12]} />
-      <Beer p={[-1.1, 0.76, -5.45]} />
-      <Beer p={[-0.62, 0.76, -2.45]} />
-      <Beer p={[-0.8, 0.76, -2.8]} />
+      <Beer p={[-3.1, 0.76, -5.2]} />
+      <Beer p={[-3.3, 0.76, -5.6]} />
       <Beer p={[-3.1, 0.76, -3.0]} />
+      <Beer p={[-3.1, 0.76, 1.4]} />
+      <Beer p={[-3.3, 0.76, 1.0]} />
+      <Beer p={[-3.55, 0.76, 6.2]} />
+      <Beer p={[-3.25, 0.76, 5.8]} />
       <Beer p={[0.8, BAR_TOP, -3.15]} />
       <Beer p={[0.8, BAR_TOP, -1.3]} />
     </>

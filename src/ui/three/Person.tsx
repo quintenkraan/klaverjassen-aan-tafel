@@ -23,7 +23,7 @@ import {
   type ClipSet,
   type PersonKey,
 } from './models';
-import { cardTexture } from './textures';
+import { blurredFaceTexture, cardTexture } from './textures';
 
 const FADE = 0.35;
 const SKIN: Record<PersonKey, string> = { ria: '#e9c2a6', henk: '#e2b497', sjaak: '#e6bc9e' };
@@ -178,6 +178,10 @@ export function Person({
       bones.left.getWorldPosition(a);
       bones.right.getWorldPosition(b);
       a.lerp(b, 0.5);
+      // Hoger en iets van het lijf af: handen pakken de onderkant, niet vóór de waaier.
+      a.y += 0.05;
+      a.x += Math.sin(rotationY) * 0.025;
+      a.z += Math.cos(rotationY) * 0.025;
       held.current.position.copy(a);
       held.current.rotation.set(-0.45, rotationY + Math.PI, 0, 'YXZ');
     }
@@ -238,6 +242,7 @@ export function Person({
   });
 
   const back = cardTexture(null);
+  const face = blurredFaceTexture();
   const spread = Math.min(0.16, 0.9 / Math.max(cards, 1));
 
   return (
@@ -293,14 +298,21 @@ export function Person({
           {Array.from({ length: cards }, (_, i) => {
             const ang = (i - (cards - 1) / 2) * spread;
             return (
-              <mesh
+              <group
                 key={i}
                 position={[Math.sin(ang) * 0.06, Math.cos(ang) * 0.06 - 0.02, -0.02 - i * 0.0015]}
                 rotation-z={-ang}
               >
-                <planeGeometry args={[HELD_W, HELD_H]} />
-                <meshStandardMaterial map={back} side={DoubleSide} roughness={0.7} />
-              </mesh>
+                {/* Voorkant naar de speler zelf (onleesbaar), rug naar de rest van de tafel */}
+                <mesh>
+                  <planeGeometry args={[HELD_W, HELD_H]} />
+                  <meshStandardMaterial map={face} roughness={0.7} />
+                </mesh>
+                <mesh rotation-y={Math.PI} position-z={-0.0004}>
+                  <planeGeometry args={[HELD_W, HELD_H]} />
+                  <meshStandardMaterial map={back} roughness={0.7} />
+                </mesh>
+              </group>
             );
           })}
         </group>

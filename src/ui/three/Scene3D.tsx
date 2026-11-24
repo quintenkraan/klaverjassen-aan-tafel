@@ -6,10 +6,10 @@ import { nl } from '../../i18n/nl';
 import type { Speech } from '../Avatar';
 import { Cafe } from './Cafe';
 import { TrickCards } from './Cards3D';
-import { fovFor, LOOK_AT, seatPose } from './layout';
+import { fovFor, LOOK_AT, seatPose, TABLE, TABLE_TOP } from './layout';
 import { isLookingAway, lookBy, lookReset } from './look';
 import { preloadModels, useClips, type AnimKey, type PersonKey } from './models';
-import { Patrons } from './Patrons';
+import { Beer, Patrons } from './Patrons';
 import { Person } from './Person';
 import { playerName } from '../names';
 
@@ -138,6 +138,8 @@ function People(props: Scene3DProps & { reduced: boolean }) {
   return (
     <>
       <Patrons clips={clips} />
+      {/* Jouw pul bier, links naast je op tafel */}
+      <Beer p={[TABLE.x + 0.42, TABLE_TOP, TABLE.z - 0.27]} size={1.7} />
       <Person
         who="henk"
         seat={0}
