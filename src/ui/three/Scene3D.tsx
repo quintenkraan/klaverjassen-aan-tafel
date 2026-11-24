@@ -9,7 +9,7 @@ import { TrickCards } from './Cards3D';
 import { fovFor, LOOK_AT, seatPose, TABLE, TABLE_TOP } from './layout';
 import { isLookingAway, lookBy, lookReset } from './look';
 import { preloadModels, useClips, type AnimKey, type PersonKey } from './models';
-import { Beer, Patrons } from './Patrons';
+import { Beer, Patrons, Pitcher } from './Patrons';
 import { Person } from './Person';
 import { playerName } from '../names';
 
@@ -140,6 +140,10 @@ function People(props: Scene3DProps & { reduced: boolean }) {
       <Patrons clips={clips} />
       {/* Jouw pul bier, links naast je op tafel */}
       <Beer p={[TABLE.x + 0.42, TABLE_TOP, TABLE.z - 0.27]} size={1.7} />
+      {/* De rest van de tafel: Sjaak naast je en Tante Ria een glas, Ome Henk een pitcher */}
+      <Beer p={[TABLE.x - 0.42, TABLE_TOP, TABLE.z - 0.27]} size={1.4} />
+      <Beer p={[TABLE.x + 0.4, TABLE_TOP, TABLE.z + 0.28]} size={1.4} />
+      <Pitcher p={[TABLE.x - 0.38, TABLE_TOP, TABLE.z + 0.26]} />
       <Person
         who="henk"
         seat={0}

@@ -149,6 +149,31 @@ export function Beer({ p, size = 1 }: { p: [number, number, number]; size?: numb
   );
 }
 
+/** Glazen pitcher (ruim 1,5 liter) met oor, voor Ome Henk. */
+export function Pitcher({ p }: { p: [number, number, number] }) {
+  return (
+    <group position={p}>
+      <mesh position={[0, 0.095, 0]}>
+        <cylinderGeometry args={[0.062, 0.055, 0.19, 18]} />
+        <meshStandardMaterial color="#d99a2b" transparent opacity={0.85} roughness={0.15} />
+      </mesh>
+      <mesh position={[0, 0.2, 0]}>
+        <cylinderGeometry args={[0.063, 0.063, 0.03, 18]} />
+        <meshStandardMaterial color="#fbf6e9" roughness={0.9} />
+      </mesh>
+      {/* Glazen rand boven het bier en een tuitje */}
+      <mesh position={[0, 0.235, 0]}>
+        <cylinderGeometry args={[0.066, 0.064, 0.04, 18, 1, true]} />
+        <meshStandardMaterial color="#e8f0f0" transparent opacity={0.25} roughness={0.05} />
+      </mesh>
+      <mesh position={[0.075, 0.12, 0]} rotation-x={Math.PI / 2}>
+        <torusGeometry args={[0.045, 0.009, 8, 16, Math.PI]} />
+        <meshStandardMaterial color="#e8f0f0" transparent opacity={0.45} roughness={0.05} />
+      </mesh>
+    </group>
+  );
+}
+
 function Patron({ g, clips }: { g: Guest; clips: ClipSet }) {
   const { scene: model, hipsRatio } = usePerson(g.who);
   const mixer = useMemo(() => new AnimationMixer(model), [model]);
