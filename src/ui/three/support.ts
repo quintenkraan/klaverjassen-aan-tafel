@@ -11,3 +11,9 @@ export function webglAvailable(): boolean {
   }
   return cached;
 }
+
+/** Telefoon of tablet: lichtere effecten en minder pixels, zodat het soepel blijft. */
+export function isLite(): boolean {
+  if (typeof matchMedia === 'undefined') return true;
+  return matchMedia('(pointer: coarse)').matches || matchMedia('(max-width: 900px)').matches;
+}

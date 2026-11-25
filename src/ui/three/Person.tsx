@@ -40,7 +40,14 @@ function collectFingers(model: Object3D): { bone: Object3D; sign: number }[] {
   });
   return out;
 }
-const SKIN: Record<PersonKey, string> = { ria: '#e9c2a6', henk: '#e2b497', sjaak: '#e6bc9e' };
+const SKIN: Record<PersonKey, string> = {
+  ria: '#e9c2a6',
+  henk: '#e2b497',
+  sjaak: '#e6bc9e',
+  granny: '#e8c4ab',
+  joe: '#d9a98a',
+  michelle: '#e7bea2',
+};
 
 export interface PersonProps {
   who: PersonKey;
@@ -173,8 +180,12 @@ export function Person({
         [armR, foreR, right, 1],
         [armL, foreL, left, -1],
       ] as const) {
-        // Jij houdt de waaier breder vast (links onder, rechts ernaast), anders lijkt het een telefoon.
-        const target = tmp.target.copy(chest).addScaledVector(side, (isPlayer ? 0.085 : 0.055) * s);
+        // Jij houdt de waaier in je linkerhand; je rechterhand zit ernaast, iets lager en naar
+        // voren, klaar om een kaart te pakken. De anderen houden hem tussen beide handen.
+        const target = tmp.target.copy(chest);
+        if (!isPlayer) target.addScaledVector(side, 0.055 * s);
+        else if (s < 0) target.addScaledVector(side, -0.07);
+        else target.addScaledVector(side, 0.11).addScaledVector(fwd, 0.03).y -= 0.035;
         arm.getWorldPosition(tmp.pole);
         tmp.pole.addScaledVector(side, 0.35 * s).addScaledVector(fwd, -0.1).y -= 0.5;
         twoBoneIK(arm, fore, hand, target, tmp.pole);
@@ -246,11 +257,11 @@ export function Person({
       bones.head.scale.setScalar(0.001);
     }
 
-    // Jouw kaarten: tussen je handen, naar je ogen gericht.
+    // Jouw kaarten: waaier vanuit je linkerhand, naar je ogen gericht.
     if (isPlayer && mine.current && bones.left && bones.right) {
       bones.left.getWorldPosition(a);
       bones.right.getWorldPosition(b);
-      a.lerp(b, 0.5);
+      a.lerp(b, 0.25);
       a.y += 0.06;
       // Iets vóór je handen: je vingers zitten achter de waaier en steken er niet doorheen.
       tmp.target.subVectors(a, camera.position).normalize();
@@ -282,46 +293,49 @@ export function Person({
 
       {isPlayer && myCards && (
         <group ref={mine}>
-          {myCards.map((card, i) => {
-            const n = myCards.length;
-            const ang = (i - (n - 1) / 2) * Math.min(0.2, 1.4 / Math.max(n, 1));
-            const id = cardId(card);
-            const can = !!playable?.some((c) => sameCard(c, card));
-            const lift = hovered === id && can ? 0.025 : 0;
-            return (
-              <mesh
-                key={id}
-                ref={(m) => {
-                  myMeshes.current[i] = m;
-                }}
-                position={[Math.sin(ang) * 0.13, Math.cos(ang) * 0.13 - 0.1 + lift, i * 0.0012]}
-                rotation-z={-ang}
-                onPointerOver={(e) => {
-                  e.stopPropagation();
-                  setHovered(id);
-                  document.body.style.cursor = can ? 'pointer' : '';
-                }}
-                onPointerOut={() => {
-                  setHovered(null);
-                  document.body.style.cursor = '';
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (can) onPlay?.(card);
-                }}
-              >
-                <planeGeometry args={[MY_W, MY_H]} />
-                <meshStandardMaterial
-                  map={cardTexture(card)}
-                  side={DoubleSide}
-                  roughness={0.6}
-                  emissive={can ? '#5a4100' : '#000000'}
-                  emissiveIntensity={can ? 0.6 : 0}
-                  color={playable && playable.length > 0 && !can ? '#5a5a5a' : '#ffffff'}
-                />
-              </mesh>
-            );
-          })}
+          {/* De waaier gaat vanuit je linkerhand naar rechts open */}
+          <group position-x={0.035} rotation-z={-0.22}>
+            {myCards.map((card, i) => {
+              const n = myCards.length;
+              const ang = (i - (n - 1) / 2) * Math.min(0.2, 1.4 / Math.max(n, 1));
+              const id = cardId(card);
+              const can = !!playable?.some((c) => sameCard(c, card));
+              const lift = hovered === id && can ? 0.025 : 0;
+              return (
+                <mesh
+                  key={id}
+                  ref={(m) => {
+                    myMeshes.current[i] = m;
+                  }}
+                  position={[Math.sin(ang) * 0.13, Math.cos(ang) * 0.13 - 0.1 + lift, i * 0.0012]}
+                  rotation-z={-ang}
+                  onPointerOver={(e) => {
+                    e.stopPropagation();
+                    setHovered(id);
+                    document.body.style.cursor = can ? 'pointer' : '';
+                  }}
+                  onPointerOut={() => {
+                    setHovered(null);
+                    document.body.style.cursor = '';
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (can) onPlay?.(card);
+                  }}
+                >
+                  <planeGeometry args={[MY_W, MY_H]} />
+                  <meshStandardMaterial
+                    map={cardTexture(card)}
+                    side={DoubleSide}
+                    roughness={0.6}
+                    emissive={can ? '#5a4100' : '#000000'}
+                    emissiveIntensity={can ? 0.6 : 0}
+                    color={playable && playable.length > 0 && !can ? '#5a5a5a' : '#ffffff'}
+                  />
+                </mesh>
+              );
+            })}
+          </group>
         </group>
       )}
 

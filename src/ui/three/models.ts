@@ -9,6 +9,10 @@ export const PEOPLE = {
   ria: `${base}ria.glb`,
   henk: `${base}henk.glb`,
   sjaak: `${base}sjaak.glb`,
+  // Cafégasten: een oudere dame, een man in jas, een jonge vrouw.
+  granny: `${base}granny.glb`,
+  joe: `${base}joe.glb`,
+  michelle: `${base}michelle.glb`,
 } as const;
 export type PersonKey = keyof typeof PEOPLE;
 

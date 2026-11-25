@@ -2,12 +2,7 @@ import { Environment, Lightformer } from '@react-three/drei';
 import { Bloom, EffectComposer, N8AO, ToneMapping, Vignette } from '@react-three/postprocessing';
 import { ToneMappingMode } from 'postprocessing';
 import { useMemo } from 'react';
-
-/** Telefoon of tablet: lichtere effecten, zodat het soepel blijft. */
-function isLite(): boolean {
-  if (typeof matchMedia === 'undefined') return true;
-  return matchMedia('(pointer: coarse)').matches || matchMedia('(max-width: 900px)').matches;
-}
+import { isLite } from './support';
 
 /**
  * Sfeer van een bruin café:

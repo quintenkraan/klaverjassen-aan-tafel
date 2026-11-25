@@ -49,7 +49,7 @@ const STOOL_X = BAR.x - 0.43;
 const GUESTS: Guest[] = [
   // Tafeltje langs de ramen vlak bij jullie: twee in gesprek
   {
-    who: 'henk',
+    who: 'joe',
     x: T,
     z: -5.0,
     facing: Math.PI,
@@ -59,7 +59,7 @@ const GUESTS: Guest[] = [
     offset: 0,
   },
   {
-    who: 'ria',
+    who: 'michelle',
     x: T,
     z: -6.0,
     facing: 0,
@@ -81,7 +81,7 @@ const GUESTS: Guest[] = [
   },
   // Voorbij het hutje aan de wandtafel: één op de bank, één op een stoel
   {
-    who: 'sjaak',
+    who: 'granny',
     x: -3.72,
     z: 2.1,
     facing: Math.PI / 2,
@@ -123,7 +123,7 @@ const GUESTS: Guest[] = [
   },
   // Aan de bar
   {
-    who: 'sjaak',
+    who: 'joe',
     x: STOOL_X,
     z: -3.2,
     facing: Math.PI / 2,

@@ -6,6 +6,7 @@ import { nl } from '../../i18n/nl';
 import type { Speech } from '../Avatar';
 import { Cafe } from './Cafe';
 import { Mood } from './Mood';
+import { isLite } from './support';
 import { TrickCards } from './Cards3D';
 import { fovFor, LOOK_AT, seatPose, TABLE, TABLE_TOP } from './layout';
 import { isLookingAway, lookBy, lookReset } from './look';
@@ -180,6 +181,7 @@ export default function Scene3D(props: Scene3DProps) {
     [],
   );
   const tags = useRef<(HTMLDivElement | null)[]>([]);
+  const lite = useMemo(isLite, []);
   // Slepen = rondkijken. Een klik (zonder slepen) blijft een klik op een kaart.
   const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const [away, setAway] = useState(false);
@@ -209,7 +211,9 @@ export default function Scene3D(props: Scene3DProps) {
     >
       <Canvas
         shadows="soft"
-        dpr={[1, 2]}
+        // Telefoon: niet meer pixels dan nodig, dan blijft het soepel; kaarten blijven scherp
+        // door hun eigen hoge resolutie en filtering.
+        dpr={lite ? [1, 1.6] : [1, 2]}
         camera={{ position: [0, 1.22, 0.86], fov: 60, near: 0.03, far: 30 }}
       >
         <Lens />
