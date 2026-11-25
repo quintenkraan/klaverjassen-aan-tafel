@@ -112,6 +112,9 @@ export const nl = {
   },
   loading3d: 'Tafel wordt gedekt...',
   lookBack: 'Kijk naar tafel',
+  signalsThisGame: 'Seinen in dit potje',
+  signalsOffNote:
+    'Zonder seinen: gewoon eerlijk klaverjassen. Je kunt het de volgende keer weer aanzetten.',
   loadingCafe: 'Het café gaat open…',
   gyroOn: 'Rondkijken met telefoon',
   gyroOff: 'Telefoon-kijken uit',

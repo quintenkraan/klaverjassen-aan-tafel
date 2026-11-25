@@ -9,8 +9,7 @@ export const PEOPLE = {
   ria: `${base}ria.glb`,
   henk: `${base}henk.glb`,
   sjaak: `${base}sjaak.glb`,
-  // Cafégasten: een oudere dame, een man in jas, een jonge vrouw.
-  granny: `${base}granny.glb`,
+  // Cafégasten: een man in jas en een jonge vrouw.
   joe: `${base}joe.glb`,
   michelle: `${base}michelle.glb`,
 } as const;

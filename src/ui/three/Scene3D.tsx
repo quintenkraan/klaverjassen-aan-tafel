@@ -1,11 +1,11 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Suspense, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Vector3, type PerspectiveCamera } from 'three';
 import type { Card, Gesture, Seat, Trick } from '../../engine';
 import { nl } from '../../i18n/nl';
 import type { Speech } from '../Avatar';
 import { Cafe } from './Cafe';
-import { GyroButton, LoadingCurtain } from './Extras';
+import { GyroButton, LoadingCurtain, Ready } from './Extras';
 import { Mood } from './Mood';
 import { ScorePaper, type ScoreRows } from './ScorePaper';
 import { isLite } from './support';
@@ -218,6 +218,8 @@ export default function Scene3D(props: Scene3DProps) {
   );
   const tags = useRef<(HTMLDivElement | null)[]>([]);
   const lite = useMemo(isLite, []);
+  const [ready, setReady] = useState(false);
+  const markReady = useCallback(() => setReady(true), []);
   // Slepen = rondkijken. Een klik (zonder slepen) blijft een klik op een kaart.
   const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const [away, setAway] = useState(false);
@@ -259,11 +261,12 @@ export default function Scene3D(props: Scene3DProps) {
         <ScorePaper score={props.score} />
         <Suspense fallback={<FallbackCamera />}>
           <People {...props} reduced={reduced} />
+          <Ready onReady={markReady} />
         </Suspense>
         <TagProjector tags={tags} />
       </Canvas>
 
-      <LoadingCurtain />
+      <LoadingCurtain ready={ready} />
       <GyroButton />
       {away && (
         <button

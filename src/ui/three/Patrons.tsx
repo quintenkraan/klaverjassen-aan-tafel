@@ -107,7 +107,7 @@ const GUESTS: Guest[] = [
   },
   // Voorbij het hutje aan de wandtafel: één op de bank, één op een stoel
   {
-    who: 'granny',
+    who: 'sjaak',
     x: -3.72,
     z: 2.1,
     facing: Math.PI / 2,

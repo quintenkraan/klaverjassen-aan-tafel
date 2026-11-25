@@ -1,4 +1,4 @@
-﻿import { useProgress } from '@react-three/drei';
+import { useProgress } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { DepthOfField } from '@react-three/postprocessing';
 import { useEffect, useRef, useState } from 'react';
@@ -28,27 +28,32 @@ export function FocusDepth() {
   return <DepthOfField ref={ref} worldFocusRange={1.8} bokehScale={2.2} resolutionScale={0.5} />;
 }
 
-/** Laadscherm: het cafÃ© en de mensen worden ingeladen. */
-export function LoadingCurtain() {
-  const { active, progress } = useProgress();
-  const [done, setDone] = useState(false);
+/** Laadscherm: het café en de mensen worden ingeladen. Weg zodra de mensen er zitten. */
+export function LoadingCurtain({ ready }: { ready: boolean }) {
+  const { progress } = useProgress();
+  const [timedOut, setTimedOut] = useState(false);
   useEffect(() => {
-    if (!active && progress >= 100) {
-      const t = setTimeout(() => setDone(true), 400);
-      return () => clearTimeout(t);
-    }
-    setDone(false);
-  }, [active, progress]);
-  if (done) return null;
+    const t = setTimeout(() => setTimedOut(true), 15000);
+    return () => clearTimeout(t);
+  }, []);
+  if (ready || timedOut) return null;
+  // Uit de cache is er niets te tellen (0 van 0): dan gewoon "bijna".
+  const pct = Number.isFinite(progress) ? Math.min(99, Math.round(progress)) : 99;
   return (
     <div className="curtain" role="status" aria-live="polite">
       <p>{nl.loadingCafe}</p>
       <div className="curtain__bar">
-        <div style={{ width: `${Math.round(progress)}%` }} />
+        <div style={{ width: `${pct}%` }} />
       </div>
-      <small>{Math.round(progress)}%</small>
+      <small>{pct}%</small>
     </div>
   );
+}
+
+/** Zit binnen dezelfde Suspense als de mensen: meldt zich zodra alles geladen is. */
+export function Ready({ onReady }: { onReady: () => void }) {
+  useEffect(() => onReady(), [onReady]);
+  return null;
 }
 
 type OrientationCtor = typeof DeviceOrientationEvent & {

@@ -97,4 +97,9 @@ bewaren per zet), SettingsScreen.tsx, RulesScreen.tsx, App.tsx (start, hervatten
 - [x] Levend café: af en toe staat een gast op en loopt via het gangpad naar de WC, de hoofddeur
       of de zijdeur, blijft even weg en gaat weer zitten (één tegelijk). Routes: src/ui/three/walks.ts,
       gedrag: Patrons.tsx (useWanderer), animaties Stand To Sit (achterstevoren = opstaan) en Walking.
+- [x] Echter aan tafel: stilstaande eigen handen, anderen reiken naar tafel, gebogen kaarten,
+      scorebriefje met pen (ScorePaper.tsx), slokjes bier, barvrouw (Bartender.tsx), sfeerlicht
+      (Mood.tsx), scherptediepte, laadscherm en rondkijken met telefoon (Extras.tsx),
+      café-geluid in code (src/ui/sound.ts). Seinen per potje aan/uit (SignalSetup.tsx).
+- [ ] Realistische gezichten (Avaturn-avatars met gezichtsuitdrukkingen); wacht op keuze.
 - [ ] Statistieken. Zie VOORSTEL-MORGEN.md voor de volgende stappen.

@@ -44,7 +44,6 @@ const SKIN: Record<PersonKey, string> = {
   ria: '#e9c2a6',
   henk: '#e2b497',
   sjaak: '#e6bc9e',
-  granny: '#e8c4ab',
   joe: '#d9a98a',
   michelle: '#e7bea2',
 };
@@ -80,6 +79,8 @@ function useLayer(
   mixer: AnimationMixer,
   clips: Record<AnimKey, import('three').AnimationClip>,
   key: AnimKey,
+  /** Stil: de houding van het eerste beeld vasthouden (voor jou: geen wiebelende armen). */
+  still = false,
 ) {
   const current = useRef<AnimationAction | null>(null);
   useEffect(() => {
@@ -91,8 +92,12 @@ function useLayer(
       next.reset().play();
       current.current.crossFadeTo(next, FADE, false);
     } else next.play();
+    if (still) {
+      next.paused = true;
+      next.time = 0;
+    }
     current.current = next;
-  }, [mixer, clips, key]);
+  }, [mixer, clips, key, still]);
 }
 
 /** Een echt mens aan tafel: zit, houdt kaarten vast, praat, lacht, knikt en seint. */
@@ -164,12 +169,17 @@ export function Person({
   useEffect(() => {
     const lower = mixer.clipAction(lowerClip);
     lower.setLoop(LoopRepeat, Infinity).play();
+    // Jij zit stil: ook je heupen wiebelen niet, anders schuiven je schouders en handen mee.
+    if (isPlayer) {
+      lower.paused = true;
+      lower.time = 0;
+    }
     return () => {
       mixer.stopAllAction();
     };
-  }, [mixer, lowerClip]);
-  useLayer(mixer, clips.body, body);
-  useLayer(mixer, clips.head, head);
+  }, [mixer, lowerClip, isPlayer]);
+  useLayer(mixer, clips.body, body, isPlayer);
+  useLayer(mixer, clips.head, head, isPlayer);
 
   useEffect(() => {
     if (gesture) gestureStart.current = performance.now();
@@ -279,8 +289,7 @@ export function Person({
       eyeSmooth.current.lerp(eye, 1 - Math.exp(-dt * 1.5));
       const t = performance.now() / 1000;
       camera.position.copy(eyeSmooth.current);
-      camera.position.y += Math.sin(t * 1.4) * 0.004; // ademhalen
-      camera.position.x += Math.sin(t * 0.37) * 0.002;
+      camera.position.y += Math.sin(t * 1.3) * 0.0012; // heel licht ademhalen
       // Standaard kijk je naar de tafel; slepen draait je hoofd (look.ts).
       lookStep(dt);
       const dx = LOOK_AT[0] - camera.position.x;
@@ -298,10 +307,10 @@ export function Person({
         const sy = 1.15 - camera.position.y;
         let dyaw = Math.atan2(sx, sz) - baseYaw;
         dyaw = Math.atan2(Math.sin(dyaw), Math.cos(dyaw));
-        wantYaw = dyaw * 0.55;
-        wantPitch = (Math.atan2(sy, Math.hypot(sx, sz)) - basePitch) * 0.55;
+        wantYaw = dyaw * 0.3;
+        wantPitch = (Math.atan2(sy, Math.hypot(sx, sz)) - basePitch) * 0.3;
       }
-      const ka = 1 - Math.exp(-dt * 2.2);
+      const ka = 1 - Math.exp(-dt * 1.2);
       auto.current.yaw += (wantYaw - auto.current.yaw) * ka;
       auto.current.pitch += (wantPitch - auto.current.pitch) * ka;
       const yaw = baseYaw + look.yaw + auto.current.yaw;

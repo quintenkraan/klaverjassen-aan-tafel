@@ -1,4 +1,4 @@
-﻿import { useFrame } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
 import {
   AnimationMixer,

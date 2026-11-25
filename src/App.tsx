@@ -44,8 +44,8 @@ export function App() {
     setStage({ kind: 'start' });
   };
 
-  const startNew = (agreement = settings.agreement) => {
-    const next = { ...settings, agreement };
+  const startNew = (agreement = settings.agreement, signalsOn = settings.signals.enabled) => {
+    const next = { ...settings, agreement, signals: { ...settings.signals, enabled: signalsOn } };
     setSettings(next);
     saveSettings(next);
     clearGame();
@@ -89,7 +89,14 @@ export function App() {
         />
       );
     case 'setup':
-      return <SignalSetup initial={settings.agreement} onStart={startNew} onBack={toStart} />;
+      return (
+        <SignalSetup
+          initial={settings.agreement}
+          initialOn={settings.signals.enabled}
+          onStart={startNew}
+          onBack={toStart}
+        />
+      );
   }
 
   const canResume = saved && !isGameOver(saved.game);
