@@ -67,6 +67,11 @@ export function TableView({
   useEffect(() => {
     if (played > 0) sound.card();
   }, [played]);
+  // Café-geluid zolang je aan tafel zit.
+  useEffect(() => {
+    sound.ambience(true);
+    return () => sound.ambience(false);
+  }, []);
   useEffect(() => {
     if (!pause && round.tricks.length > 0) sound.collect();
   }, [pause, round.tricks.length]);
