@@ -13,9 +13,9 @@ const RANK_NAMES: Record<Rank, string> = {
 
 export const nl = {
   title: 'Klaverjassen aan tafel',
-  subtitle: 'Schuif aan. Ome Henk deelt zo.',
+  subtitle: 'Schuif aan bij Roeland, Jurre en Sander.',
   newGame: 'Nieuw spel',
-  players: ['Jij', 'Tante Ria', 'Ome Henk', 'Sjaak'] as const,
+  players: ['Jij', 'Roeland', 'Jurre', 'Sander'] as const,
   teams: ['Wij', 'Zij'] as const,
   suits: {
     klaveren: 'Klaveren',
@@ -159,7 +159,7 @@ export const nl = {
     {
       title: 'Het spel',
       lines: [
-        'Je speelt met z’n vieren, twee tegen twee. Ome Henk zit tegenover je en is je maat.',
+        'Je speelt met z’n vieren, twee tegen twee. Jurre zit schuin tegenover je en is je maat.',
         'Er wordt gespeeld met 32 kaarten (7 tot en met aas). Iedereen krijgt er acht.',
         'Eén speler kiest troef. Zijn team moet daarna meer dan de helft van de punten halen.',
       ],
@@ -214,9 +214,9 @@ export const nl = {
     {
       title: 'Seinen',
       lines: [
-        'Spreek vooraf met Henk af wat elk gebaar betekent. Seinen doe je met de knop linksonder.',
-        'Henk ziet het niet altijd en begrijpt het niet altijd goed. Knikt hij, dan zag hij iets.',
-        'Tante Ria en Sjaak letten op. Eerst krijg je een waarschuwing, daarna straf.',
+        'Spreek vooraf met Jurre af wat elk gebaar betekent. Seinen doe je met de knop linksonder.',
+        'Jurre ziet het niet altijd en begrijpt het niet altijd goed. Knikt hij, dan zag hij iets.',
+        'Roeland en Sander letten op. Eerst krijg je een waarschuwing, daarna straf.',
         'Zie je de tegenstanders seinen, druk dan meteen op "Ik zag dat!". Onterecht kost je punten.',
       ],
     },
@@ -243,9 +243,9 @@ export const nl = {
   meaning: (m: Meaning) => (m === 'troefboer' ? 'Ik heb de troefboer' : `Speel ${m.slice(6)}`),
   noMeaning: 'Geen betekenis',
   youDid: (gesture: string) => `Jij: ${gesture.toLowerCase()}`,
-  setupTitle: 'Seinafspraak met Ome Henk',
+  setupTitle: 'Seinafspraak met Jurre',
   setupIntro:
-    'Spreek af wat elk gebaar betekent. Henk let niet altijd op en snapt het niet altijd goed. Tante Ria en Sjaak kijken mee, en hoe vaker er geseind wordt, hoe achterdochtiger de tafel.',
+    'Spreek af wat elk gebaar betekent. Jurre let niet altijd op en snapt het niet altijd goed. Roeland en Sander kijken mee, en hoe vaker er geseind wordt, hoe achterdochtiger de tafel.',
   setupGesture: 'Gebaar',
   setupMeaning: 'Betekenis',
   signalsOn: 'Seinen aan',

@@ -1,8 +1,8 @@
 # Klaverjassen aan tafel
 
-Een first-person klaverjasgame in de browser. Je zit aan een keukentafel met Ome Henk
-(je maat) tegenover je en Tante Ria en Sjaak links en rechts. Je kunt met Henk seinen,
-maar pas op: hij snapt het niet altijd, en de tegenstanders kijken mee.
+Een first-person klaverjasgame in de browser. Je zit in een bruin café met Jurre (je maat)
+schuin tegenover je, Roeland tegenover je en Sander naast je op de bank. Je kunt met Jurre
+seinen, maar pas op: hij snapt het niet altijd, en de tegenstanders kijken mee.
 
 ## Wat zit erin
 
@@ -66,7 +66,7 @@ Beperking: de gastheer moet zijn venster open houden.
 
 - De 3D-tafel staat in een bruin café (bar, achterbar, spiegelwand, ramen, ingang met
   houten schot), nagebouwd in code in `src/ui/three/Cafe.tsx`. Plattegrond: `src/ui/three/layout.ts`.
-- Jij zit op de bank met Sjaak naast je; Ria tegenover, Henk (je maat) schuin tegenover.
+- Jij zit op de bank met Sander naast je; Roeland tegenover, Jurre (je maat) schuin tegenover.
 - Slepen = rondkijken. "Kijk naar tafel" zet je blik terug. Kaarten klik je in je eigen handen.
 - Andere gasten drinken een biertje, praten, en staan af en toe op om naar de WC of naar buiten te lopen.
 - In Instellingen kun je terug naar de eenvoudige tafel (voor oudere apparaten).
