@@ -117,36 +117,16 @@ function useLastPlayed(trick: Trick | undefined): { seat: Seat; at: number } | n
   return last;
 }
 
-/** Wie de laatste slag pakte, en wanneer (voor de veeg-beweging). */
-function useSweep(
-  trick: Trick | undefined,
-  winner: Seat | null,
-): { seat: Seat; at: number } | null {
-  const [s, setS] = useState<{ seat: Seat; at: number } | null>(null);
-  const full = (trick?.cards.length ?? 0) === 4;
-  useEffect(() => {
-    if (full && winner !== null && winner !== 0) setS({ seat: winner, at: performance.now() });
-  }, [full, winner]);
-  useEffect(() => {
-    if (!s) return;
-    const t = setTimeout(() => setS(null), 1200);
-    return () => clearTimeout(t);
-  }, [s]);
-  return s;
-}
-
 function People(props: Scene3DProps & { reduced: boolean }) {
   const clips = useClips();
   const played = useLastPlayed(props.trick);
-  const sweep = useSweep(props.trick, props.winner);
-  // Kaart leggen: hand naar de eigen plek op het kleed. Slag pakken: hand naar het midden.
+  // Kaart leggen: alleen dan reikt de hand kort naar de eigen plek op het kleed.
   const reachFor = (seat: Seat): { id: number; to: Vec3 } | null => {
     if (played?.seat === seat) {
       const n = Math.max(0, (props.trick?.cards.length ?? 1) - 1);
       const [x, y, z] = spotFor(seat, n);
       return { id: played.at, to: [x, y + 0.03, z] };
     }
-    if (sweep?.seat === seat) return { id: sweep.at, to: [TABLE.x, TABLE_TOP + 0.03, TABLE.z] };
     return null;
   };
 
@@ -155,15 +135,13 @@ function People(props: Scene3DProps & { reduced: boolean }) {
     const speaking = props.speech?.seat === seat ? props.speech : null;
     // Jij: armen en hoofd blijven rustig bij je kaarten; geen animaties die eraan trekken.
     if (seat === 0) return { body: 'hold', head: 'hold' };
-    let body: AnimKey = 'hold';
+    const body: AnimKey = 'hold';
     let head: AnimKey = props.thinking === seat ? 'hold' : 'idle';
     // Praten en lachen doen ze met hun hoofd; de handen houden rustig de kaarten vast.
     if (speaking) head = moodFor(speaking.text);
-    if (g === 'tikken' || g === 'rugkaart') body = 'point';
-    if (g === 'oorkrabben' || g === 'keelschrapen') {
-      body = 'think';
-      head = 'think';
-    }
+    // Seinen zonder armbewegingen: de handen blijven stil bij de kaarten. Tikken hoor je,
+    // de kaart met de rug van de hand zie je omklappen, krabben en keelschrapen doet het hoofd.
+    if (g === 'oorkrabben' || g === 'keelschrapen') head = 'think';
     if (props.nodSeat === seat) head = 'nod';
     return { body, head };
   };

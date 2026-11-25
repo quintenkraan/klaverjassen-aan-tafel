@@ -32,11 +32,17 @@ const FADE = 0.35;
 const GRIP = 0.9;
 const X_AXIS = new Vector3(1, 0, 0);
 
-function collectFingers(model: Object3D): { bone: Object3D; sign: number }[] {
-  const out: { bone: Object3D; sign: number }[] = [];
+/**
+ * Vingers met een vaste greep-stand (rusthouding + krul), één keer uitgerekend. Elk beeld zetten
+ * we die stand opnieuw: niet "een stukje erbij", want dan draaien de vingers steeds verder door.
+ */
+function collectFingers(model: Object3D): { bone: Object3D; grip: Quaternion }[] {
+  const out: { bone: Object3D; grip: Quaternion }[] = [];
   model.traverse((o) => {
     const m = /^(Left|Right)Hand(Index|Middle|Ring|Pinky)\d$/.exec(o.name);
-    if (m) out.push({ bone: o, sign: m[1] === 'Left' ? 1 : -1 });
+    if (!m) return;
+    const curl = new Quaternion().setFromAxisAngle(X_AXIS, GRIP * (m[1] === 'Left' ? 1 : -1));
+    out.push({ bone: o, grip: o.quaternion.clone().multiply(curl) });
   });
   return out;
 }
@@ -92,10 +98,10 @@ function useLayer(
       next.reset().play();
       current.current.crossFadeTo(next, FADE, false);
     } else next.play();
-    if (still) {
-      next.paused = true;
-      next.time = 0;
-    }
+    // Stil = tijd staat stil, maar de houding wordt wél elk beeld toegepast. (Met `paused`
+    // past three.js hem niet meer toe en blijven armen en vingers in een tussenstand hangen.)
+    next.paused = false;
+    next.timeScale = still ? 0 : 1;
     current.current = next;
   }, [mixer, clips, key, still]);
 }
@@ -169,17 +175,15 @@ export function Person({
   useEffect(() => {
     const lower = mixer.clipAction(lowerClip);
     lower.setLoop(LoopRepeat, Infinity).play();
-    // Jij zit stil: ook je heupen wiebelen niet, anders schuiven je schouders en handen mee.
-    if (isPlayer) {
-      lower.paused = true;
-      lower.time = 0;
-    }
+    // Aan tafel zit iedereen stil: heupen wiebelen niet, anders schuiven schouders en handen mee.
+    lower.paused = false;
+    lower.timeScale = 0;
     return () => {
       mixer.stopAllAction();
     };
-  }, [mixer, lowerClip, isPlayer]);
+  }, [mixer, lowerClip]);
   // Kaarten vasthouden = armen stil (jij altijd; de anderen behalve bij een sein-gebaar).
-  useLayer(mixer, clips.body, body, isPlayer || body === 'hold');
+  useLayer(mixer, clips.body, body, true);
   useLayer(mixer, clips.head, head, isPlayer);
 
   useEffect(() => {
@@ -195,7 +199,8 @@ export function Person({
     const rs = reachState.current;
     const rp = rs ? (performance.now() - rs.start) / REACH_MS : 1;
     if (rs && rp >= 1) reachState.current = null;
-    const wantIk = isPlayer || body === 'hold' || rp < 1;
+    // Iedereen aan tafel houdt altijd zijn kaarten vast: handen alleen weg om een kaart te leggen.
+    const wantIk = true;
     ikWeight.current += ((wantIk ? 1 : 0) - ikWeight.current) * Math.min(1, dt * 6);
     const w = ikWeight.current;
     const { armL, foreL, left, armR, foreR, right } = bones;
@@ -231,7 +236,8 @@ export function Person({
         bn.quaternion.copy(saved[i]!).slerp(ik, w);
       });
       // Echte greep: vingers om de kaarten heen gekruld, achter de waaier.
-      for (const f of bones.fingers) f.bone.rotateOnAxis(X_AXIS, GRIP * w * f.sign);
+      // Echte greep: vaste vingerstand om de kaarten.
+      for (const f of bones.fingers) f.bone.quaternion.copy(f.grip);
       model.updateMatrixWorld(true);
     }
     if (!isPlayer && bones.right) {
