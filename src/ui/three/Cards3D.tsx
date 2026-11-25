@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Euler, Quaternion, Vector3, type Group } from 'three';
 import { cardId, type Card, type PlayedCard, type Seat, type Trick } from '../../engine';
 import { CARD_H, CARD_W, edgeFor, spotFor, tiltFor, type Vec3 } from './layout';
-import { handOrigin } from './handOrigin';
+import { handOrigin, seatHands } from './handOrigin';
 import { cardTexture } from './textures';
 
 /** Kaart in je hand kijkt naar je toe (+z); een kaart op tafel ligt plat (voorkant +y). */
@@ -85,7 +85,11 @@ export function TrickCards({ trick, winner }: { trick: Trick | undefined; winner
           <FlatCard
             key={cardId(pc.card)}
             card={pc.card}
-            from={hand ? (hand.pos.toArray() as Vec3) : edgeFor(pc.seat)}
+            from={
+              hand
+                ? (hand.pos.toArray() as Vec3)
+                : ((seatHands.get(pc.seat)?.toArray() as Vec3 | undefined) ?? edgeFor(pc.seat))
+            }
             fromQuat={hand ? hand.quat.clone().multiply(FACE_UP_FIX) : undefined}
             to={spotFor(pc.seat, i)}
             yaw={tiltFor(cardId(pc.card))}

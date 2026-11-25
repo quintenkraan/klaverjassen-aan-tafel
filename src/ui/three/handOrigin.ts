@@ -6,3 +6,6 @@ import { Quaternion, Vector3 } from 'three';
  * zodat je hem echt uit je waaier ziet komen.
  */
 export const handOrigin = new Map<string, { pos: Vector3; quat: Quaternion }>();
+
+/** Rechterhand van de anderen (per stoel): daar komt hun gespeelde kaart vandaan. */
+export const seatHands = new Map<number, Vector3>();

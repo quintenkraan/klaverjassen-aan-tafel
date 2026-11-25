@@ -13,9 +13,9 @@ import {
   type Mesh,
   type Object3D,
 } from 'three';
-import { handOrigin } from './handOrigin';
+import { handOrigin, seatHands } from './handOrigin';
 import type { Gesture, Seat } from '../../engine';
-import { HELD_H, HELD_W, LOOK_AT, seatPose, TABLE_TOP } from './layout';
+import { HELD_H, HELD_W, LOOK_AT, seatPose, TABLE_TOP, type Vec3 } from './layout';
 import { look, lookStep } from './look';
 import {
   findBone,
@@ -64,7 +64,14 @@ export interface PersonProps {
   myCards?: Card[];
   playable?: Card[];
   onPlay?: (card: Card) => void;
+  /** Alleen voor jou: wie er praat; je kijkt dan even die kant op (als je zelf niet rondkijkt). */
+  attention?: Seat | null;
+  /** Reiken met de rechterhand naar een plek op tafel (kaart leggen, slag pakken). */
+  reach?: { id: number; to: Vec3 } | null;
 }
+
+/** Hoe lang reiken duurt (heen en terug), in ms. */
+const REACH_MS = 950;
 
 const MY_W = 0.072;
 const MY_H = 0.1;
@@ -101,6 +108,8 @@ export function Person({
   myCards,
   playable,
   onPlay,
+  attention = null,
+  reach = null,
 }: PersonProps) {
   const { scene: model, hipsRatio } = usePerson(who);
   const { position, rotationY } = seatPose(seat);
@@ -122,6 +131,12 @@ export function Person({
   );
   const myMeshes = useRef<(Mesh | null)[]>([]);
   const ikWeight = useRef(0);
+  const eyeSmooth = useRef<Vector3 | null>(null);
+  const auto = useRef({ yaw: 0, pitch: 0 });
+  const reachState = useRef<{ start: number; to: Vector3 } | null>(null);
+  useEffect(() => {
+    if (reach) reachState.current = { start: performance.now(), to: new Vector3(...reach.to) };
+  }, [reach?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const held = useRef<Group>(null);
   const mine = useRef<Group>(null);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -166,7 +181,11 @@ export function Person({
     const { a, b, q, eye } = tmp;
 
     // Handen naar de borst, boven tafel, als je kaarten vasthoudt (IK, zacht in- en uitgeblend).
-    ikWeight.current += ((body === 'hold' ? 1 : 0) - ikWeight.current) * Math.min(1, dt * 6);
+    const rs = reachState.current;
+    const rp = rs ? (performance.now() - rs.start) / REACH_MS : 1;
+    if (rs && rp >= 1) reachState.current = null;
+    const wantIk = isPlayer || body === 'hold' || rp < 1;
+    ikWeight.current += ((wantIk ? 1 : 0) - ikWeight.current) * Math.min(1, dt * 6);
     const w = ikWeight.current;
     const { armL, foreL, left, armR, foreR, right } = bones;
     if (w > 0.01 && armL && foreL && left && armR && foreR && right) {
@@ -186,6 +205,12 @@ export function Person({
         if (!isPlayer) target.addScaledVector(side, 0.055 * s);
         else if (s < 0) target.addScaledVector(side, -0.07);
         else target.addScaledVector(side, 0.11).addScaledVector(fwd, 0.03).y -= 0.035;
+        // Reiken: de rechterhand gaat naar tafel en terug (zachte boog).
+        if (s > 0 && rs && rp < 1) {
+          const env = Math.sin(Math.PI * Math.min(1, rp));
+          target.lerp(rs.to, env);
+          target.y += Math.sin(Math.PI * rp) * 0.03;
+        }
         arm.getWorldPosition(tmp.pole);
         tmp.pole.addScaledVector(side, 0.35 * s).addScaledVector(fwd, -0.1).y -= 0.5;
         twoBoneIK(arm, fore, hand, target, tmp.pole);
@@ -197,6 +222,11 @@ export function Person({
       // Echte greep: vingers om de kaarten heen gekruld, achter de waaier.
       for (const f of bones.fingers) f.bone.rotateOnAxis(X_AXIS, GRIP * w * f.sign);
       model.updateMatrixWorld(true);
+    }
+    if (!isPlayer && bones.right) {
+      const h = seatHands.get(seat) ?? new Vector3();
+      bones.right.getWorldPosition(h);
+      seatHands.set(seat, h);
     }
     const gp = (performance.now() - gestureStart.current) / 1300;
     const g = gesture && gp < 1 ? gesture : null;
@@ -244,14 +274,38 @@ export function Person({
       // Jouw ogen: ~10 cm boven het hoofdbot en iets naar voren. Het hoofd zelf is verborgen.
       bones.head.getWorldPosition(a);
       eye.set(a.x + Math.sin(rotationY) * 0.08, a.y + 0.1, a.z + Math.cos(rotationY) * 0.08);
-      camera.position.lerp(eye, 0.5);
+      // Rustig: het hoofdbot wiebelt mee met de animatie, je ogen volgen dat maar heel traag.
+      if (!eyeSmooth.current) eyeSmooth.current = eye.clone();
+      eyeSmooth.current.lerp(eye, 1 - Math.exp(-dt * 1.5));
+      const t = performance.now() / 1000;
+      camera.position.copy(eyeSmooth.current);
+      camera.position.y += Math.sin(t * 1.4) * 0.004; // ademhalen
+      camera.position.x += Math.sin(t * 0.37) * 0.002;
       // Standaard kijk je naar de tafel; slepen draait je hoofd (look.ts).
       lookStep(dt);
       const dx = LOOK_AT[0] - camera.position.x;
       const dy = LOOK_AT[1] - camera.position.y;
       const dz = LOOK_AT[2] - camera.position.z;
-      const yaw = Math.atan2(dx, dz) + look.yaw;
-      const pitch = Math.atan2(dy, Math.hypot(dx, dz)) + look.pitch;
+      const baseYaw = Math.atan2(dx, dz);
+      const basePitch = Math.atan2(dy, Math.hypot(dx, dz));
+      // Praat iemand, en kijk je zelf niet rond? Dan kijk je even op, die kant op.
+      let wantYaw = 0;
+      let wantPitch = 0;
+      if (attention !== null && attention !== 0 && Math.abs(look.targetYaw) < 0.05) {
+        const sp = seatPose(attention).position;
+        const sx = sp[0] - camera.position.x;
+        const sz = sp[2] - camera.position.z;
+        const sy = 1.15 - camera.position.y;
+        let dyaw = Math.atan2(sx, sz) - baseYaw;
+        dyaw = Math.atan2(Math.sin(dyaw), Math.cos(dyaw));
+        wantYaw = dyaw * 0.55;
+        wantPitch = (Math.atan2(sy, Math.hypot(sx, sz)) - basePitch) * 0.55;
+      }
+      const ka = 1 - Math.exp(-dt * 2.2);
+      auto.current.yaw += (wantYaw - auto.current.yaw) * ka;
+      auto.current.pitch += (wantPitch - auto.current.pitch) * ka;
+      const yaw = baseYaw + look.yaw + auto.current.yaw;
+      const pitch = basePitch + look.pitch + auto.current.pitch;
       b.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
       camera.lookAt(b.add(camera.position));
       bones.head.scale.setScalar(0.001);

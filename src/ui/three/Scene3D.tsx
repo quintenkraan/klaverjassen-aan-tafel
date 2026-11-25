@@ -8,7 +8,7 @@ import { Cafe } from './Cafe';
 import { Mood } from './Mood';
 import { isLite } from './support';
 import { TrickCards } from './Cards3D';
-import { fovFor, LOOK_AT, seatPose, TABLE, TABLE_TOP } from './layout';
+import { fovFor, LOOK_AT, seatPose, spotFor, TABLE, TABLE_TOP, type Vec3 } from './layout';
 import { isLookingAway, lookBy, lookReset } from './look';
 import { preloadModels, useClips, type AnimKey, type PersonKey } from './models';
 import { Beer, Patrons, Pitcher } from './Patrons';
@@ -113,16 +113,46 @@ function useLastPlayed(trick: Trick | undefined): { seat: Seat; at: number } | n
   return last;
 }
 
+/** Wie de laatste slag pakte, en wanneer (voor de veeg-beweging). */
+function useSweep(
+  trick: Trick | undefined,
+  winner: Seat | null,
+): { seat: Seat; at: number } | null {
+  const [s, setS] = useState<{ seat: Seat; at: number } | null>(null);
+  const full = (trick?.cards.length ?? 0) === 4;
+  useEffect(() => {
+    if (full && winner !== null && winner !== 0) setS({ seat: winner, at: performance.now() });
+  }, [full, winner]);
+  useEffect(() => {
+    if (!s) return;
+    const t = setTimeout(() => setS(null), 1200);
+    return () => clearTimeout(t);
+  }, [s]);
+  return s;
+}
+
 function People(props: Scene3DProps & { reduced: boolean }) {
   const clips = useClips();
   const played = useLastPlayed(props.trick);
+  const sweep = useSweep(props.trick, props.winner);
+  // Kaart leggen: hand naar de eigen plek op het kleed. Slag pakken: hand naar het midden.
+  const reachFor = (seat: Seat): { id: number; to: Vec3 } | null => {
+    if (played?.seat === seat) {
+      const n = Math.max(0, (props.trick?.cards.length ?? 1) - 1);
+      const [x, y, z] = spotFor(seat, n);
+      return { id: played.at, to: [x, y + 0.03, z] };
+    }
+    if (sweep?.seat === seat) return { id: sweep.at, to: [TABLE.x, TABLE_TOP + 0.03, TABLE.z] };
+    return null;
+  };
 
   const moods = (seat: Seat): { body: AnimKey; head: AnimKey } => {
     const g = props.gesture?.seat === seat ? props.gesture.gesture : null;
     const speaking = props.speech?.seat === seat ? props.speech : null;
+    // Jij: armen en hoofd blijven rustig bij je kaarten; geen animaties die eraan trekken.
+    if (seat === 0) return { body: 'hold', head: 'hold' };
     let body: AnimKey = 'hold';
-    let head: AnimKey = props.thinking === seat || seat === 0 ? 'hold' : 'idle';
-    if (played?.seat === seat) body = 'point';
+    let head: AnimKey = props.thinking === seat ? 'hold' : 'idle';
     if (speaking) {
       const m = moodFor(speaking.text);
       body = m;
@@ -157,6 +187,7 @@ function People(props: Scene3DProps & { reduced: boolean }) {
         myCards={props.myCards}
         playable={props.playable}
         onPlay={props.onPlay}
+        attention={props.speech?.seat ?? null}
       />
       {BOTS.map((seat) => (
         <Person
@@ -167,6 +198,7 @@ function People(props: Scene3DProps & { reduced: boolean }) {
           {...moods(seat)}
           cards={props.handCounts[seat - 1]!}
           gesture={props.gesture?.seat === seat ? props.gesture.gesture : null}
+          reach={reachFor(seat)}
         />
       ))}
     </>
