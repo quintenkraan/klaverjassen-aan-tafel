@@ -12,10 +12,18 @@ import { nl } from '../i18n/nl';
 import { CardView } from './CardView';
 import { playerName } from './names';
 
-export function ScoreSheet({ game, children }: { game: GameState; children?: ReactNode }) {
+export function ScoreSheet({
+  game,
+  children,
+  hidden = false,
+}: {
+  game: GameState;
+  children?: ReactNode;
+  hidden?: boolean;
+}) {
   const sum = totals(game);
   return (
-    <aside className="sheet">
+    <aside className={hidden ? 'sheet sr-only' : 'sheet'}>
       <h2>{nl.scoreSheet}</h2>
       <table>
         <thead>

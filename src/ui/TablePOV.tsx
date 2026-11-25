@@ -3,7 +3,7 @@ import { webglAvailable } from './three/support';
 
 /** three.js is groot: pas laden als de 3D-tafel echt nodig is. */
 const Scene3D = lazy(() => import('./three/Scene3D'));
-import { bidOptions, GESTURES, playableCards, sameCard, sortHand } from '../engine';
+import { bidOptions, GESTURES, playableCards, sameCard, sortHand, totals } from '../engine';
 import { nl } from '../i18n/nl';
 import { BidPanel } from './BidPanel';
 import { Avatar } from './Avatar';
@@ -188,6 +188,13 @@ export function TableView({
               myCards={hand}
               playable={playable}
               onPlay={play}
+              score={{
+                rows: game.scores.map((s) => ({
+                  total: s.total,
+                  nat: s.nat ? s.playingTeam : null,
+                })),
+                sum: totals(game),
+              }}
             />
           </Suspense>
         )}
@@ -287,7 +294,8 @@ export function TableView({
           !pause && <RoundOverlay game={game} onNext={nextRound} />
         )}
       </div>
-      <ScoreSheet game={game}>
+      {/* In 3D staat de stand op het briefje op tafel; deze blijft voor schermlezers. */}
+      <ScoreSheet game={game} hidden={use3d}>
         {showLog && rules.signals.enabled && <SignalLog game={game} />}
       </ScoreSheet>
     </div>

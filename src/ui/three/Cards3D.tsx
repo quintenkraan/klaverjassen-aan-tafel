@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Euler, Quaternion, Vector3, type Group } from 'three';
+import { Euler, PlaneGeometry, Quaternion, Vector3, type Group } from 'three';
 import { cardId, type Card, type PlayedCard, type Seat, type Trick } from '../../engine';
 import { CARD_H, CARD_W, edgeFor, spotFor, tiltFor, type Vec3 } from './layout';
 import { handOrigin, seatHands } from './handOrigin';
@@ -19,6 +19,20 @@ interface CardProps {
   /** Begindraaiing (jouw kaart: zoals hij in je hand zat). */
   fromQuat?: Quaternion;
 }
+
+/** Een echte speelkaart is nooit helemaal plat: de lange randen staan iets omhoog. */
+function bentCard(sign: 1 | -1) {
+  const g = new PlaneGeometry(CARD_W, CARD_H, 8, 2);
+  const pos = g.attributes.position!;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i) / (CARD_W / 2);
+    pos.setZ(i, sign * 0.0016 * x * x);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+const FRONT = bentCard(1);
+const BACK = bentCard(-1);
 
 /** Kaart die plat op tafel ligt en soepel van `from` naar `to` glijdt. */
 function FlatCard({ card, from, to, yaw, shrink, fromQuat }: CardProps) {
@@ -43,13 +57,11 @@ function FlatCard({ card, from, to, yaw, shrink, fromQuat }: CardProps) {
 
   return (
     <group ref={ref} position={start}>
-      <mesh rotation-x={-Math.PI / 2} castShadow receiveShadow>
-        <planeGeometry args={[CARD_W, CARD_H]} />
-        <meshStandardMaterial map={cardTexture(card)} roughness={0.6} />
+      <mesh rotation-x={-Math.PI / 2} geometry={FRONT} castShadow receiveShadow>
+        <meshStandardMaterial map={cardTexture(card)} roughness={0.45} />
       </mesh>
-      <mesh rotation-x={Math.PI / 2}>
-        <planeGeometry args={[CARD_W, CARD_H]} />
-        <meshStandardMaterial map={cardTexture(null)} roughness={0.6} />
+      <mesh rotation-x={Math.PI / 2} geometry={BACK} castShadow>
+        <meshStandardMaterial map={cardTexture(null)} roughness={0.45} />
       </mesh>
     </group>
   );

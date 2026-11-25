@@ -6,6 +6,7 @@ import { nl } from '../../i18n/nl';
 import type { Speech } from '../Avatar';
 import { Cafe } from './Cafe';
 import { Mood } from './Mood';
+import { ScorePaper, type ScoreRows } from './ScorePaper';
 import { isLite } from './support';
 import { TrickCards } from './Cards3D';
 import { fovFor, LOOK_AT, seatPose, spotFor, TABLE, TABLE_TOP, type Vec3 } from './layout';
@@ -29,6 +30,8 @@ export interface Scene3DProps {
   myCards: Card[];
   playable: Card[];
   onPlay: (card: Card) => void;
+  /** Stand voor het scorebriefje op tafel. */
+  score: ScoreRows;
 }
 
 const BOTS = [1, 2, 3] as const;
@@ -252,6 +255,7 @@ export default function Scene3D(props: Scene3DProps) {
         <Cafe />
         <Mood />
         <TrickCards trick={props.trick} winner={props.winner} />
+        <ScorePaper score={props.score} />
         <Suspense fallback={<FallbackCamera />}>
           <People {...props} reduced={reduced} />
         </Suspense>
