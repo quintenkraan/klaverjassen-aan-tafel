@@ -11,7 +11,9 @@ import {
   type AnimationAction,
   type Group,
   type Mesh,
+  type Object3D,
 } from 'three';
+import { handOrigin } from './handOrigin';
 import type { Gesture, Seat } from '../../engine';
 import { HELD_H, HELD_W, LOOK_AT, seatPose, TABLE_TOP } from './layout';
 import { look, lookStep } from './look';
@@ -26,6 +28,18 @@ import {
 import { blurredFaceTexture, cardTexture } from './textures';
 
 const FADE = 0.35;
+/** Hoe ver de vingers krullen als iemand kaarten vasthoudt (radialen per kootje). */
+const GRIP = 0.9;
+const X_AXIS = new Vector3(1, 0, 0);
+
+function collectFingers(model: Object3D): { bone: Object3D; sign: number }[] {
+  const out: { bone: Object3D; sign: number }[] = [];
+  model.traverse((o) => {
+    const m = /^(Left|Right)Hand(Index|Middle|Ring|Pinky)\d$/.exec(o.name);
+    if (m) out.push({ bone: o, sign: m[1] === 'Left' ? 1 : -1 });
+  });
+  return out;
+}
 const SKIN: Record<PersonKey, string> = { ria: '#e9c2a6', henk: '#e2b497', sjaak: '#e6bc9e' };
 
 export interface PersonProps {
@@ -94,9 +108,12 @@ export function Person({
       foreL: findBone(model, 'LeftForeArm'),
       armR: findBone(model, 'RightArm'),
       foreR: findBone(model, 'RightForeArm'),
+      /** Vingers (zonder duim): die krullen om de kaarten als je ze vasthoudt. */
+      fingers: collectFingers(model),
     }),
     [model],
   );
+  const myMeshes = useRef<(Mesh | null)[]>([]);
   const ikWeight = useRef(0);
   const held = useRef<Group>(null);
   const mine = useRef<Group>(null);
@@ -166,6 +183,8 @@ export function Person({
         const ik = bn.quaternion.clone();
         bn.quaternion.copy(saved[i]!).slerp(ik, w);
       });
+      // Echte greep: vingers om de kaarten heen gekruld, achter de waaier.
+      for (const f of bones.fingers) f.bone.rotateOnAxis(X_AXIS, GRIP * w * f.sign);
       model.updateMatrixWorld(true);
     }
     const gp = (performance.now() - gestureStart.current) / 1300;
@@ -238,6 +257,16 @@ export function Person({
       a.addScaledVector(tmp.target, -0.04);
       mine.current.position.copy(a);
       mine.current.lookAt(camera.position);
+      // Onthoud waar elke kaart zit, zodat een gespeelde kaart uit je waaier naar tafel gaat.
+      mine.current.updateMatrixWorld(true);
+      myMeshes.current.forEach((m, i) => {
+        const card = myCards?.[i];
+        if (!m || !card) return;
+        const o = handOrigin.get(cardId(card)) ?? { pos: new Vector3(), quat: new Quaternion() };
+        m.getWorldPosition(o.pos);
+        m.getWorldQuaternion(o.quat);
+        handOrigin.set(cardId(card), o);
+      });
     }
   });
 
@@ -262,6 +291,9 @@ export function Person({
             return (
               <mesh
                 key={id}
+                ref={(m) => {
+                  myMeshes.current[i] = m;
+                }}
                 position={[Math.sin(ang) * 0.13, Math.cos(ang) * 0.13 - 0.1 + lift, i * 0.0012]}
                 rotation-z={-ang}
                 onPointerOver={(e) => {
@@ -285,7 +317,7 @@ export function Person({
                   roughness={0.6}
                   emissive={can ? '#5a4100' : '#000000'}
                   emissiveIntensity={can ? 0.6 : 0}
-                  color={playable && playable.length > 0 && !can ? '#9a9a9a' : '#ffffff'}
+                  color={playable && playable.length > 0 && !can ? '#5a5a5a' : '#ffffff'}
                 />
               </mesh>
             );
