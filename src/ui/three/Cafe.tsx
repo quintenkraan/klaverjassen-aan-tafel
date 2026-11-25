@@ -905,7 +905,8 @@ export function GameTable({ x = TABLE.x, mat = true }: { x?: number; mat?: boole
       )}
       <Box p={[0, TABLE_TOP / 2, 0]} s={[0.08, TABLE_TOP - 0.05, 0.08]} c={WOOD_DARK} />
       <Box p={[0, 0.02, 0]} s={[0.5, 0.04, 0.45]} c={WOOD_DARK} />
-      <Candle p={[TABLE.w / 2 - 0.08, TABLE_TOP, TABLE.d / 2 - 0.08]} light={mat} />
+      {/* Kaarsje aan de verre rand, tussen Ria en Henk in: los van de glazen (anders flikkert het). */}
+      <Candle p={[0, TABLE_TOP, TABLE.d / 2 - 0.07]} light={mat} />
     </group>
   );
 }
