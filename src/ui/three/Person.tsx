@@ -178,7 +178,8 @@ export function Person({
       mixer.stopAllAction();
     };
   }, [mixer, lowerClip, isPlayer]);
-  useLayer(mixer, clips.body, body, isPlayer);
+  // Kaarten vasthouden = armen stil (jij altijd; de anderen behalve bij een sein-gebaar).
+  useLayer(mixer, clips.body, body, isPlayer || body === 'hold');
   useLayer(mixer, clips.head, head, isPlayer);
 
   useEffect(() => {

@@ -157,11 +157,8 @@ function People(props: Scene3DProps & { reduced: boolean }) {
     if (seat === 0) return { body: 'hold', head: 'hold' };
     let body: AnimKey = 'hold';
     let head: AnimKey = props.thinking === seat ? 'hold' : 'idle';
-    if (speaking) {
-      const m = moodFor(speaking.text);
-      body = m;
-      head = m;
-    }
+    // Praten en lachen doen ze met hun hoofd; de handen houden rustig de kaarten vast.
+    if (speaking) head = moodFor(speaking.text);
     if (g === 'tikken' || g === 'rugkaart') body = 'point';
     if (g === 'oorkrabben' || g === 'keelschrapen') {
       body = 'think';
