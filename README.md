@@ -72,7 +72,8 @@ Beperking: de gastheer moet zijn venster open houden.
 - In Instellingen kun je terug naar de eenvoudige tafel (voor oudere apparaten).
 
 De mensen en animaties komen van [Mixamo](https://www.mixamo.com) (Adobe), gratis te
-gebruiken in games. De ruwe FBX-bestanden staan niet in de repo (`assets-src/` is genegeerd);
+gebruiken in games. Je tafelgenoten zijn avatars van [Avaturn](https://avaturn.me), gemaakt van een selfie
+(`public/models/av1..3.glb`, met lichte telefoonversies `*-lite.glb`). De ruwe FBX-bestanden staan niet in de repo (`assets-src/` is genegeerd);
 de omgezette, gecomprimeerde GLB's staan in `public/models/`. Omzetten deed ik zo:
 
 ```bash

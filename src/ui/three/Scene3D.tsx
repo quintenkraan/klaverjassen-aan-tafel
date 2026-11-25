@@ -37,7 +37,8 @@ export interface Scene3DProps {
 }
 
 const BOTS = [1, 2, 3] as const;
-const WHO: Record<1 | 2 | 3, PersonKey> = { 1: 'ria', 2: 'henk', 3: 'sjaak' };
+/** Wie er aan tafel zit: de Avaturn-avatars. (Jij zelf blijft het Mixamo-lichaam: je ziet alleen je armen.) */
+const WHO: Record<1 | 2 | 3, PersonKey> = { 1: 'av3', 2: 'av1', 3: 'av2' };
 const PLAY_MS = 900;
 
 preloadModels();

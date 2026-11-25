@@ -10,6 +10,10 @@ export const PEOPLE = {
   ria: `${base}ria.glb`,
   henk: `${base}henk.glb`,
   sjaak: `${base}sjaak.glb`,
+  // Jouw tafelgenoten: avatars van Avaturn (gemaakt van een selfie).
+  av1: `${base}av1.glb`,
+  av2: `${base}av2.glb`,
+  av3: `${base}av3.glb`,
   // Cafégasten: een man in jas en een jonge vrouw.
   joe: `${base}joe.glb`,
   michelle: `${base}michelle.glb`,
@@ -217,6 +221,8 @@ export function movesFor(m: MoveClips, hipsRatio: number, forward: number): Move
 
 /** Alleen wat aan jullie tafel nodig is; de andere gasten laden daarna. */
 export function preloadModels() {
-  (['ria', 'henk', 'sjaak'] as const).forEach((k) => useGLTF.preload(personUrl(k), false, true));
+  (['av1', 'av2', 'av3', 'henk'] as const).forEach((k) =>
+    useGLTF.preload(personUrl(k), false, true),
+  );
   ANIMS.forEach((k) => useGLTF.preload(animUrl(k), false, true));
 }

@@ -51,6 +51,9 @@ const SKIN: Record<PersonKey, string> = {
   henk: '#e2b497',
   sjaak: '#e6bc9e',
   joe: '#d9a98a',
+  av1: '#e3b89c',
+  av2: '#e3b89c',
+  av3: '#e3b89c',
   michelle: '#e7bea2',
 };
 
