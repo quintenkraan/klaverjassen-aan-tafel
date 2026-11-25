@@ -112,6 +112,9 @@ export const nl = {
   },
   loading3d: 'Tafel wordt gedekt...',
   lookBack: 'Kijk naar tafel',
+  loadingCafe: 'Het café gaat open…',
+  gyroOn: 'Rondkijken met telefoon',
+  gyroOff: 'Telefoon-kijken uit',
   playOnline: 'Online spelen',
   online: {
     title: 'Online spelen',

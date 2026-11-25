@@ -2,6 +2,7 @@ import { Environment, Lightformer } from '@react-three/drei';
 import { Bloom, EffectComposer, N8AO, ToneMapping, Vignette } from '@react-three/postprocessing';
 import { ToneMappingMode } from 'postprocessing';
 import { useMemo } from 'react';
+import { FocusDepth } from './Extras';
 import { isLite } from './support';
 
 /**
@@ -50,6 +51,7 @@ export function Mood() {
         />
       </Environment>
       <EffectComposer multisampling={lite ? 0 : 4} enableNormalPass={false}>
+        <>{!lite && <FocusDepth />}</>
         <>{!lite && <N8AO halfRes aoRadius={0.35} distanceFalloff={0.5} intensity={1.3} />}</>
         <Bloom mipmapBlur luminanceThreshold={1} luminanceSmoothing={0.15} intensity={0.9} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />

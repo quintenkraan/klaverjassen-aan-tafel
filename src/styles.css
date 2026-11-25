@@ -867,3 +867,43 @@ body:has(.setup) {
     gap: 4px;
   }
 }
+
+/* Laadscherm van het 3D-café */
+.curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  text-align: center;
+  background: radial-gradient(circle at 50% 45%, #3a2414, #0d0907 70%);
+  color: #f3e3c4;
+  font-size: 1.2rem;
+}
+.curtain p {
+  margin: 0;
+}
+.curtain__bar {
+  width: min(60vw, 320px);
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+.curtain__bar div {
+  height: 100%;
+  background: #e8b04a;
+  transition: width 0.3s;
+}
+/* Rondkijken met de telefoon */
+.gyro {
+  position: absolute;
+  right: 12px;
+  bottom: 64px;
+  z-index: 7;
+  font-size: 0.85rem;
+}
+.gyro[aria-pressed='true'] {
+  background: #e8b04a;
+}

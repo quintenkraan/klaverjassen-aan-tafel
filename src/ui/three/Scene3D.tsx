@@ -5,6 +5,7 @@ import type { Card, Gesture, Seat, Trick } from '../../engine';
 import { nl } from '../../i18n/nl';
 import type { Speech } from '../Avatar';
 import { Cafe } from './Cafe';
+import { GyroButton, LoadingCurtain } from './Extras';
 import { Mood } from './Mood';
 import { ScorePaper, type ScoreRows } from './ScorePaper';
 import { isLite } from './support';
@@ -262,6 +263,8 @@ export default function Scene3D(props: Scene3DProps) {
         <TagProjector tags={tags} />
       </Canvas>
 
+      <LoadingCurtain />
+      <GyroButton />
       {away && (
         <button
           type="button"
