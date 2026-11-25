@@ -1,6 +1,14 @@
 import { Instance, Instances } from '@react-three/drei';
 import { useEffect, useMemo, useState } from 'react';
-import { CanvasTexture, RepeatWrapping, SRGBColorSpace, TextureLoader, type Texture } from 'three';
+import {
+  CanvasTexture,
+  LatheGeometry,
+  RepeatWrapping,
+  SRGBColorSpace,
+  TextureLoader,
+  Vector2,
+  type Texture,
+} from 'three';
 import { createRng } from '../../engine';
 import {
   BAR,
@@ -48,6 +56,86 @@ function canvasTexture(
   const t = new CanvasTexture(c);
   t.colorSpace = SRGBColorSpace;
   return t;
+}
+
+/** Houtnerf (grijstinten, wordt met de kleur vermenigvuldigd). Eén keer gemaakt, overal gebruikt. */
+let grainTex: Texture | null = null;
+function grain(): Texture {
+  if (grainTex) return grainTex;
+  const rng = createRng(31);
+  grainTex = canvasTexture(256, 256, (ctx) => {
+    ctx.fillStyle = '#e2e2e2';
+    ctx.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 70; i++) {
+      const y = rng() * 256;
+      const shade = 170 + Math.floor(rng() * 60);
+      ctx.strokeStyle = `rgba(${shade},${shade},${shade},${0.35 + rng() * 0.4})`;
+      ctx.lineWidth = 0.6 + rng() * 2.2;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      for (let x = 0; x <= 256; x += 16) ctx.lineTo(x, y + Math.sin(x / 40 + i) * (2 + rng() * 3));
+      ctx.stroke();
+    }
+    // Een paar kwasten
+    for (let i = 0; i < 4; i++) {
+      ctx.fillStyle = 'rgba(140,140,140,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(rng() * 256, rng() * 256, 6 + rng() * 6, 2 + rng() * 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+  grainTex.colorSpace = '';
+  return grainTex;
+}
+
+/** Straat 's avonds aan de overkant: gevels met warme ramen, een lantaarn, natte stoep. */
+let streetTex: Texture | null = null;
+function street(): Texture {
+  if (streetTex) return streetTex;
+  const rng = createRng(77);
+  streetTex = canvasTexture(512, 512, (ctx) => {
+    const sky = ctx.createLinearGradient(0, 0, 0, 200);
+    sky.addColorStop(0, '#070b16');
+    sky.addColorStop(1, '#1b2640');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, 512, 512);
+    // Gevels met daklijn
+    let x = 0;
+    while (x < 512) {
+      const w = 90 + rng() * 80;
+      const top = 110 + rng() * 80;
+      ctx.fillStyle = ['#2a1d16', '#231a17', '#2d221a', '#1e1714'][Math.floor(rng() * 4)]!;
+      ctx.fillRect(x, top, w, 400 - top);
+      for (let wy = top + 18; wy < 370; wy += 36)
+        for (let wx = x + 10; wx < x + w - 16; wx += 22) {
+          const lit = rng() < 0.45;
+          ctx.fillStyle = lit ? `hsl(${32 + rng() * 14}, 80%, ${42 + rng() * 16}%)` : '#121624';
+          ctx.fillRect(wx, wy, 10, 17);
+        }
+      x += w;
+    }
+    // Stoep en straat, nat
+    const road = ctx.createLinearGradient(0, 400, 0, 512);
+    road.addColorStop(0, '#191c24');
+    road.addColorStop(1, '#0b0d12');
+    ctx.fillStyle = road;
+    ctx.fillRect(0, 400, 512, 112);
+    // Lantaarn met gloed en weerspiegeling
+    const lx = 120 + rng() * 280;
+    const glow = ctx.createRadialGradient(lx, 170, 2, lx, 170, 90);
+    glow.addColorStop(0, 'rgba(255,214,150,0.95)');
+    glow.addColorStop(1, 'rgba(255,214,150,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(lx - 90, 80, 180, 180);
+    ctx.fillStyle = '#0c0c0e';
+    ctx.fillRect(lx - 3, 175, 6, 235);
+    const refl = ctx.createLinearGradient(0, 410, 0, 512);
+    refl.addColorStop(0, 'rgba(255,200,130,0.35)');
+    refl.addColorStop(1, 'rgba(255,200,130,0)');
+    ctx.fillStyle = refl;
+    ctx.fillRect(lx - 14, 410, 28, 102);
+  });
+  return streetTex;
 }
 
 function useTextures() {
@@ -186,6 +274,7 @@ function Box({
       <boxGeometry args={s} />
       <meshStandardMaterial
         color={c}
+        map={m < 0.5 && !e ? grain() : null}
         roughness={r}
         metalness={m}
         emissive={e ?? '#000000'}
@@ -317,6 +406,17 @@ function Window({
 }) {
   const cols = 2;
   const rows = 3;
+  // Elk ruitje toont zijn eigen stukje van de straat.
+  const panes = useMemo(
+    () =>
+      Array.from({ length: cols * rows }, (_, i) => {
+        const tex = street().clone();
+        tex.repeat.set(1 / cols, 1 / rows);
+        tex.offset.set((i % cols) / cols, Math.floor(i / cols) / rows);
+        return tex;
+      }),
+    [],
+  );
   return (
     <group position={p} rotation-y={rotY}>
       <Box p={[0, 0, 0]} s={[w + 0.12, h + 0.12, 0.06]} c={WOOD_DARK} />
@@ -327,11 +427,12 @@ function Window({
           <mesh key={i} position={[(cx * w) / cols, (cy * h) / rows, 0.035]}>
             <planeGeometry args={[w / cols - 0.06, h / rows - 0.06]} />
             <meshStandardMaterial
-              color="#1a2438"
-              emissive="#31456e"
-              emissiveIntensity={0.45}
-              roughness={0.1}
-              metalness={0.3}
+              color="#0e1220"
+              emissive="#ffffff"
+              emissiveMap={panes[i]}
+              emissiveIntensity={0.5}
+              roughness={0.08}
+              metalness={0.2}
             />
           </mesh>
         );
@@ -444,6 +545,22 @@ function Bar({ t }: { t: ReturnType<typeof useTextures> }) {
       }
     return out;
   }, []);
+  // Flesvorm: buik, schouder, hals en een randje. Hoogte 1, wordt per fles geschaald.
+  const bottleShape = useMemo(() => {
+    const pts = [
+      [0, 0],
+      [0.034, 0],
+      [0.036, 0.04],
+      [0.036, 0.6],
+      [0.03, 0.7],
+      [0.014, 0.78],
+      [0.012, 0.95],
+      [0.015, 0.97],
+      [0.013, 1],
+      [0, 1],
+    ].map(([x, y]) => new Vector2(x!, y! - 0.5));
+    return new LatheGeometry(pts, 12);
+  }, []);
   const lights = useMemo(() => {
     const out: [number, number, number][] = [];
     for (let z = BACKBAR.z0; z < BACKBAR.z1; z += 0.12)
@@ -520,9 +637,13 @@ function Bar({ t }: { t: ReturnType<typeof useTextures> }) {
       {[0, 1, 2, 3].map((s) => (
         <Box key={s} p={[BACKBAR.x + 0.28, 1.3 + s * 0.42, cz]} s={[0.5, 0.025, len]} c="#3a2617" />
       ))}
-      <Instances limit={bottles.length}>
-        <cylinderGeometry args={[0.032, 0.035, 1, 10]} />
-        <meshStandardMaterial roughness={0.15} metalness={0.2} />
+      {/* Verlichte achterwand: de flessen staan er als silhouet voor */}
+      <mesh position={[BACKBAR.x + 0.295, 2.1, cz]} rotation-y={-Math.PI / 2}>
+        <planeGeometry args={[len, 1.6]} />
+        <meshStandardMaterial color="#2a1a0e" emissive="#ffb067" emissiveIntensity={0.55} />
+      </mesh>
+      <Instances limit={bottles.length} geometry={bottleShape}>
+        <meshStandardMaterial roughness={0.06} metalness={0.25} envMapIntensity={1.6} />
         {bottles.map((b, i) => (
           <Instance key={i} position={b.p} scale={[1, b.h, 1]} color={b.c} />
         ))}

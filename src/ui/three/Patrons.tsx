@@ -152,7 +152,12 @@ export function Beer({ p, size = 1 }: { p: [number, number, number]; size?: numb
     <group position={p} scale={size}>
       <mesh position={[0, 0.07, 0]}>
         <cylinderGeometry args={[0.032, 0.027, 0.14, 14]} />
-        <meshStandardMaterial color="#d99a2b" transparent opacity={0.85} roughness={0.15} />
+        <meshStandardMaterial
+          color="#c98a22"
+          emissive="#b8701a"
+          emissiveIntensity={0.4}
+          roughness={0.12}
+        />
       </mesh>
       <mesh position={[0, 0.15, 0]}>
         <cylinderGeometry args={[0.033, 0.033, 0.025, 14]} />
@@ -168,7 +173,12 @@ export function Pitcher({ p }: { p: [number, number, number] }) {
     <group position={p}>
       <mesh position={[0, 0.095, 0]}>
         <cylinderGeometry args={[0.062, 0.055, 0.19, 18]} />
-        <meshStandardMaterial color="#d99a2b" transparent opacity={0.85} roughness={0.15} />
+        <meshStandardMaterial
+          color="#c98a22"
+          emissive="#b8701a"
+          emissiveIntensity={0.4}
+          roughness={0.12}
+        />
       </mesh>
       <mesh position={[0, 0.2, 0]}>
         <cylinderGeometry args={[0.063, 0.063, 0.03, 18]} />

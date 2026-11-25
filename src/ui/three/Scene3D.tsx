@@ -5,6 +5,7 @@ import type { Card, Gesture, Seat, Trick } from '../../engine';
 import { nl } from '../../i18n/nl';
 import type { Speech } from '../Avatar';
 import { Cafe } from './Cafe';
+import { Mood } from './Mood';
 import { TrickCards } from './Cards3D';
 import { fovFor, LOOK_AT, seatPose, TABLE, TABLE_TOP } from './layout';
 import { isLookingAway, lookBy, lookReset } from './look';
@@ -207,12 +208,13 @@ export default function Scene3D(props: Scene3DProps) {
       }}
     >
       <Canvas
-        shadows
+        shadows="soft"
         dpr={[1, 2]}
         camera={{ position: [0, 1.22, 0.86], fov: 60, near: 0.03, far: 30 }}
       >
         <Lens />
         <Cafe />
+        <Mood />
         <TrickCards trick={props.trick} winner={props.winner} />
         <Suspense fallback={<FallbackCamera />}>
           <People {...props} reduced={reduced} />
