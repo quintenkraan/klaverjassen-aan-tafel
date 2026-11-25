@@ -112,6 +112,9 @@ export const nl = {
   },
   loading3d: 'Tafel wordt gedekt...',
   lookBack: 'Kijk naar tafel',
+  install: 'Zet op je beginscherm',
+  installIos:
+    'Tip: zet het spel op je beginscherm via Delen > "Zet op beginscherm". Dan opent het schermvullend en laadt het sneller.',
   signalsThisGame: 'Seinen in dit potje',
   signalsOffNote:
     'Zonder seinen: gewoon eerlijk klaverjassen. Je kunt het de volgende keer weer aanzetten.',

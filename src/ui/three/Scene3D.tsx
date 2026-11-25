@@ -1,3 +1,4 @@
+import { PerformanceMonitor } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Vector3, type PerspectiveCamera } from 'three';
@@ -117,6 +118,22 @@ function useLastPlayed(trick: Trick | undefined): { seat: Seat; at: number } | n
   return last;
 }
 
+/** De andere gasten komen pas als jullie tafel klaarstaat (sneller aan tafel op 4G). */
+function LaterGuests({ clips }: { clips: ReturnType<typeof useClips> }) {
+  const [go, setGo] = useState(false);
+  const lite = useMemo(isLite, []);
+  useEffect(() => {
+    const t = setTimeout(() => setGo(true), lite ? 2500 : 800);
+    return () => clearTimeout(t);
+  }, [lite]);
+  if (!go) return null;
+  return (
+    <Suspense fallback={null}>
+      <Patrons clips={clips} lite={lite} />
+    </Suspense>
+  );
+}
+
 function People(props: Scene3DProps & { reduced: boolean }) {
   const clips = useClips();
   const played = useLastPlayed(props.trick);
@@ -148,7 +165,7 @@ function People(props: Scene3DProps & { reduced: boolean }) {
 
   return (
     <>
-      <Patrons clips={clips} />
+      <LaterGuests clips={clips} />
       {/* Jouw pul bier, links naast je op tafel */}
       <Beer p={[TABLE.x + 0.42, TABLE_TOP, TABLE.z - 0.27]} size={1.7} />
       {/* De rest van de tafel: Sjaak naast je en Tante Ria een glas, Ome Henk een pitcher */}
@@ -194,6 +211,8 @@ export default function Scene3D(props: Scene3DProps) {
   const tags = useRef<(HTMLDivElement | null)[]>([]);
   const lite = useMemo(isLite, []);
   const [ready, setReady] = useState(false);
+  // Automatische rem: schokt het, dan minder pixels; gaat het weer soepel, dan meer.
+  const [dpr, setDpr] = useState(lite ? 1.5 : Math.min(2, window.devicePixelRatio || 1));
   const markReady = useCallback(() => setReady(true), []);
   // Slepen = rondkijken. Een klik (zonder slepen) blijft een klik op een kaart.
   const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
@@ -226,9 +245,13 @@ export default function Scene3D(props: Scene3DProps) {
         shadows="soft"
         // Telefoon: niet meer pixels dan nodig, dan blijft het soepel; kaarten blijven scherp
         // door hun eigen hoge resolutie en filtering.
-        dpr={lite ? [1, 1.6] : [1, 2]}
+        dpr={dpr}
         camera={{ position: [0, 1.22, 0.86], fov: 60, near: 0.03, far: 30 }}
       >
+        <PerformanceMonitor
+          onDecline={() => setDpr((d) => Math.max(0.75, d - 0.25))}
+          onIncline={() => setDpr((d) => Math.min(lite ? 1.5 : 2, d + 0.25))}
+        />
         <Lens />
         <Cafe />
         <Mood />

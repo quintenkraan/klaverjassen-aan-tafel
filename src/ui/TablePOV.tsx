@@ -10,6 +10,7 @@ import { Avatar } from './Avatar';
 import { HandFan } from './HandFan';
 import { GameOverOverlay, LastTrickPopup, RoundOverlay, ScoreSheet, SignalLog } from './Panels';
 import { sound } from './sound';
+import { useKeepAwake } from './appMode';
 import type { TableConfig } from './storage';
 import { TrickArea } from './TrickArea';
 import { useGame, type GameController } from './useGame';
@@ -67,6 +68,7 @@ export function TableView({
   useEffect(() => {
     if (played > 0) sound.card();
   }, [played]);
+  useKeepAwake();
   // Café-geluid zolang je aan tafel zit.
   useEffect(() => {
     sound.ambience(true);

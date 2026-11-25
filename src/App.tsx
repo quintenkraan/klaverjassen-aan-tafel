@@ -13,6 +13,7 @@ import {
   type TableConfig,
 } from './ui/storage';
 import { TablePOV } from './ui/TablePOV';
+import { isInstalled, useInstall } from './ui/appMode';
 import { Online } from './ui/online/Online';
 
 /** Code uit een uitnodigingslink (?tafel=CODE). */
@@ -105,6 +106,7 @@ export function App() {
     <main className="start">
       <h1>{nl.title}</h1>
       <p>{nl.subtitle}</p>
+      <InstallHint />
       <div className="start__buttons">
         {canResume && (
           <button
@@ -124,7 +126,8 @@ export function App() {
         )}
         <button
           type="button"
-          onClick={() => (settings.signals.enabled ? setStage({ kind: 'setup' }) : startNew())}
+          // Altijd langs het startscherm: daar zet je seinen voor dit potje aan of uit.
+          onClick={() => setStage({ kind: 'setup' })}
         >
           {nl.newGame}
           {canResume && <small>{nl.newGameWarning}</small>}
@@ -141,4 +144,17 @@ export function App() {
       </div>
     </main>
   );
+}
+
+/** Op de telefoon: zet het spel op je beginscherm (opent dan schermvullend, laadt snel). */
+function InstallHint() {
+  const { canPrompt, install, ios } = useInstall();
+  if (isInstalled() || !matchMedia('(pointer: coarse)').matches) return null;
+  if (canPrompt)
+    return (
+      <button type="button" className="install" onClick={install}>
+        {nl.install}
+      </button>
+    );
+  return ios ? <p className="install">{nl.installIos}</p> : null;
 }

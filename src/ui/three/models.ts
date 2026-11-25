@@ -2,6 +2,7 @@ import { useGLTF } from '@react-three/drei';
 import { useMemo } from 'react';
 import { AnimationClip, type Bone, type Object3D } from 'three';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { isLite } from './support';
 
 /** Mensen en animaties van Mixamo, omgezet naar GLB (zie scripts in README). */
 const base = `${import.meta.env.BASE_URL}models/`;
@@ -14,6 +15,12 @@ export const PEOPLE = {
   michelle: `${base}michelle.glb`,
 } as const;
 export type PersonKey = keyof typeof PEOPLE;
+
+/** Op telefoons: lichtere versie (kleinere texturen, minder driehoeken). */
+const LITE = isLite();
+function personUrl(key: PersonKey): string {
+  return LITE ? PEOPLE[key].replace(/\.glb$/, '-lite.glb') : PEOPLE[key];
+}
 
 export const ANIMS = [
   'idle',
@@ -127,7 +134,7 @@ export interface PersonModel {
  * gemaakt (Remy is twee keer zo groot), dus schalen we op heuphoogte.
  */
 export function usePerson(key: PersonKey): PersonModel {
-  const { scene } = useGLTF(PEOPLE[key], false, true);
+  const { scene } = useGLTF(personUrl(key), false, true);
   return useMemo(() => {
     const copy = cloneSkinned(scene);
     copy.traverse((o) => {
@@ -208,8 +215,8 @@ export function movesFor(m: MoveClips, hipsRatio: number, forward: number): Move
   return { sit: fix(m.sit, false), walk: fix(m.walk, true) };
 }
 
+/** Alleen wat aan jullie tafel nodig is; de andere gasten laden daarna. */
 export function preloadModels() {
-  Object.values(PEOPLE).forEach((u) => useGLTF.preload(u, false, true));
+  (['ria', 'henk', 'sjaak'] as const).forEach((k) => useGLTF.preload(personUrl(k), false, true));
   ANIMS.forEach((k) => useGLTF.preload(animUrl(k), false, true));
-  MOVES.forEach((k) => useGLTF.preload(`${base}anim-${k}.glb`, false, true));
 }

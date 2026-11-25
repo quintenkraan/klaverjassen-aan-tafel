@@ -506,11 +506,11 @@ const WALKERS = GUESTS.map((g, i) => (g.x === T && !g.stool ? i : -1)).filter((i
  * Af en toe staat er iemand op en loopt naar de WC, naar buiten of naar de zijdeur, blijft even
  * weg en komt terug. Altijd hooguit één tegelijk: rustig, en zuinig op telefoons.
  */
-function useWanderer(): [{ guest: number; trip: Trip } | null, () => void] {
+function useWanderer(enabled = true): [{ guest: number; trip: Trip } | null, () => void] {
   const [active, setActive] = useState<{ guest: number; trip: Trip } | null>(null);
   const rng = useRef(createRng(0x9a57));
   useEffect(() => {
-    if (active) return;
+    if (active || !enabled) return;
     const r = rng.current;
     const wait = 25000 + r() * 35000;
     const t = setTimeout(() => {
@@ -523,27 +523,31 @@ function useWanderer(): [{ guest: number; trip: Trip } | null, () => void] {
       });
     }, wait);
     return () => clearTimeout(t);
-  }, [active]);
+  }, [active, enabled]);
   return [active, () => setActive(null)];
 }
 
 /** Andere cafégasten, voor de sfeer. Ze doen hun eigen ding en spelen niet mee. */
-export function Patrons({ clips }: { clips: ClipSet }) {
+export function Patrons({ clips, lite = false }: { clips: ClipSet; lite?: boolean }) {
   const moves = useMoveClips();
-  const [active, done] = useWanderer();
+  const [active, done] = useWanderer(!lite);
+  // Telefoon: drie gasten (twee aan het tafeltje naast jullie, één aan de bar), niemand loopt.
+  const shown = lite ? [0, 1, 7] : GUESTS.map((_, i) => i);
   return (
     <>
-      {GUESTS.map((g, i) => (
-        <Patron
-          key={i}
-          g={g}
-          clips={clips}
-          moves={moves}
-          trip={active?.guest === i ? active.trip : null}
-          onDone={done}
-        />
-      ))}
-      <Bartender clips={clips} moves={moves} />
+      {shown
+        .map((i) => [GUESTS[i]!, i] as const)
+        .map(([g, i]) => (
+          <Patron
+            key={i}
+            g={g}
+            clips={clips}
+            moves={moves}
+            trip={active?.guest === i ? active.trip : null}
+            onDone={done}
+          />
+        ))}
+      {!lite && <Bartender clips={clips} moves={moves} />}
     </>
   );
 }

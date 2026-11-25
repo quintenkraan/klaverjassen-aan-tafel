@@ -919,3 +919,10 @@ body:has(.setup) {
   width: 22px;
   height: 22px;
 }
+
+.install {
+  margin: 0 auto 12px;
+  max-width: 34em;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
